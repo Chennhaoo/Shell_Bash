@@ -41,8 +41,8 @@ directory(){
 
 get_version(){
 	echo -e "${Info} 输入你想要的内核版本号(仅支持版本号: 4.9.3 ~ 4.16.3):"
-	read -p "(输入版本号，例如: 4.10.10，默认安装 v4.10.10):" required_version
-	[[ -z "${required_version}" ]] && required_version=4.10.10
+	read -p "(输入版本号，例如: 4.10.10，默认安装 v4.9.124):" required_version
+	[[ -z "${required_version}" ]] && required_version=4.9.124
 }
 
 get_url(){
@@ -297,8 +297,10 @@ uninstall(){
 	echo -e "${Info} please remember ${reboot} to stop tcp_nanqinlang !"
 }
 
+echo -e "${Info} 本脚本只适用于Debian KVM架构，脚本出自南琴浪，当前版本：3.4.5.1 "
 echo -e "${Info} 选择你要使用的功能: "
-echo -e "1.安装内核\n2.安装并开启算法\n3.检查算法运行状态\n4.卸载算法"
+echo -e "1.安装内核 \n2.安装并开启算法 \n3.检查算法运行状态 \n4.卸载算法"
+echo -e "步骤：选择第 1 项，安装完毕后重启，然后选择第 2 项，最后运行第 3 项"
 read -p "输入数字以选择:" function
 
 while [[ ! "${function}" =~ ^[1-4]$ ]]
