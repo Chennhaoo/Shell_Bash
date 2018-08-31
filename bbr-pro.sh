@@ -42,10 +42,10 @@ get_version(){
 	echo -e "${Info} 检测稳定版内核最新版本中..."
 	latest_version=$(wget -qO- -t1 -T2 "http://kernel.ubuntu.com/~kernel-ppa/mainline/" | awk -F'\"v' '/v4.9.*/{print $2}' |grep -v '\-rc'| cut -d/ -f1 | sort -V | tail -1)
 	[[ -z ${latest_version} ]] && echo -e "${Error} 检测内核最新版本失败 !" && exit 1
-	echo -e "${Info} 稳定版内核最新版本为 : ${latest_version}"
+	echo -e "${Info} 稳定版内核最新版本为 : [ ${latest_version} ]"
 	echo -e "${Info} 输入你想要的内核版本号(仅支持版本号: 4.9.3 ~ 4.16.3):"
 	read -p "(直接回车，自动获取最新稳定版本):" required_version
-	[[ -z "${required_version}" ]] && required_version==${latest_version}
+	[[ -z "${required_version}" ]] && required_version="${latest_version}"
 }
 
 get_url(){
@@ -304,11 +304,12 @@ uninstall(){
 bbr_ver(){
 	deb_ver=`dpkg -l|grep linux-image | awk '{print $2}' | awk -F '-' '{print $3}' | grep '[4-9].[0-9]*.'`
 	latest_version_a=$(wget -qO- -t1 -T2 "http://kernel.ubuntu.com/~kernel-ppa/mainline/" | awk -F'\"v' '/v4.9.*/{print $2}' |grep -v '\-rc'| cut -d/ -f1 | sort -V | tail -1)
-	echo -e "${Info} 本机内核版本：${deb_ver}"
-	echo -e "${Info} 最新稳定版内核：${latest_version_a}"
+	echo -e "${Info} 本机内核版本：[ ${deb_ver} ]"
+	echo -e "${Info} 最新稳定版内核：[ ${latest_version_a} ]"
 }
 
-echo -e "本脚本来自南琴浪，当前版本 V3.4.5.1 "
+echo -e "本脚本来自南琴浪，当前版本 V3.4.5.1 
+"
 echo -e "${Info} 选择你要使用的功能:
 
 1.安装内核 
@@ -316,8 +317,10 @@ echo -e "${Info} 选择你要使用的功能:
 3.检查算法运行状态 
 4.卸载算法
 
-步骤：选择第 1 项---安装完毕后重启---然后选择第 2 项---最后运行第 3 项"
+步骤：选择第 1 项---安装完毕后重启---然后选择第 2 项---最后运行第 3 项
+"
 bbr_ver
+
 read -p "输入数字以选择:" function
 
 while [[ ! "${function}" =~ ^[1-4]$ ]]
