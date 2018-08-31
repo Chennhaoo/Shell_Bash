@@ -6,10 +6,10 @@ reboot="${Yellow_font}重启${Font_suffix}"
 echo -e "${Green_font}
 #================================================
 # Project:  tcp_nanqinlang general
-# Platform: --Debian --KVM
+# Platform: 仅支持Debian KVM架构
 # Branch:   --pro --with-kernel-v4.16-support
 # Version:  3.4.5.1
-# Author:   nanqinlang
+# Author:   南琴浪
 # Blog:     https://sometimesnaive.org
 # Github:   https://github.com/nanqinlang
 #================================================
@@ -297,15 +297,20 @@ uninstall(){
 	echo -e "${Info} please remember ${reboot} to stop tcp_nanqinlang !"
 }
 
-echo -e "${Info} 本脚本只适用于Debian KVM架构，脚本出自南琴浪，当前版本：3.4.5.1 "
-echo -e "${Info} 选择你要使用的功能: "
-echo -e "1.安装内核 \n2.安装并开启算法 \n3.检查算法运行状态 \n4.卸载算法"
-echo -e "步骤：选择第 1 项，安装完毕后重启，然后选择第 2 项，最后运行第 3 项"
+echo -e "${Info} 选择你要使用的功能:
+
+1.安装内核 
+2.安装并开启算法
+3.检查算法运行状态 
+4.卸载算法
+
+步骤：选择第 1 项，安装完毕后重启，然后选择第 2 项，最后运行第 3 项
+"
 read -p "输入数字以选择:" function
 
 while [[ ! "${function}" =~ ^[1-4]$ ]]
 	do
-		echo -e "${Error} 无效输入"
+		echo -e "${Error} 无效输入 Ctrl+C退出"
 		echo -e "${Info} 请重新选择" && read -p "输入数字以选择:" function
 	done
 
