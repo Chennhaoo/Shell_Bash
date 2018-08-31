@@ -3,7 +3,6 @@ Green_font="\033[32m" && Yellow_font="\033[33m" && Red_font="\033[31m" && Font_s
 Info="${Green_font}[Info]${Font_suffix}"
 Error="${Red_font}[Error]${Font_suffix}"
 reboot="${Yellow_font}重启${Font_suffix}"
-echo -e "${Green_font}
 #================================================
 # Project:  tcp_nanqinlang general
 # Platform: 仅支持Debian KVM架构
@@ -13,16 +12,16 @@ echo -e "${Green_font}
 # Blog:     https://sometimesnaive.org
 # Github:   https://github.com/nanqinlang
 #================================================
-${Font_suffix}"
+
 
 check_system(){
 	#cat /etc/issue | grep -q -E -i "debian" && release="debian"
 	#[[ "${release}" != "debian" ]] && echo -e "${Error} only support Debian !" && exit 1
-	[[ -z "`cat /etc/issue | grep -iE "debian"`" ]] && echo -e "${Error} only support Debian !" && exit 1
+	[[ -z "`cat /etc/issue | grep -iE "debian"`" ]] && echo -e "${Error} 仅支持 Debian 系统 !" && exit 1
 }
 
 check_root(){
-	[[ "`id -u`" != "0" ]] && echo -e "${Error} must be root user !" && exit 1
+	[[ "`id -u`" != "0" ]] && echo -e "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作 !" && exit 1
 }
 
 check_kvm(){
@@ -31,7 +30,7 @@ check_kvm(){
 	apt-get install -y ca-certificates
 	#virt=`virt-what`
 	#[[ "${virt}" = "openvz" ]] && echo -e "${Error} OpenVZ not support !" && exit 1
-	[[ "`virt-what`" != "kvm" ]] && echo -e "${Error} only support KVM !" && exit 1
+	[[ "`virt-what`" != "kvm" ]] && echo -e "${Error} 仅支持 KVM !" && exit 1
 }
 
 directory(){
@@ -40,9 +39,13 @@ directory(){
 }
 
 get_version(){
+	echo -e "${Info} 检测稳定版内核最新版本中..."
+	latest_version=$(wget -qO- -t1 -T2 "http://kernel.ubuntu.com/~kernel-ppa/mainline/" | awk -F'\"v' '/v4.9.*/{print $2}' |grep -v '\-rc'| cut -d/ -f1 | sort -V | tail -1)
+	[[ -z ${latest_version} ]] && echo -e "${Error} 检测内核最新版本失败 !" && exit 1
+	echo -e "${Info} 稳定版内核最新版本为 : ${latest_version}"
 	echo -e "${Info} 输入你想要的内核版本号(仅支持版本号: 4.9.3 ~ 4.16.3):"
-	read -p "(输入版本号，例如: 4.10.10，默认安装 v4.9.124):" required_version
-	[[ -z "${required_version}" ]] && required_version=4.9.124
+	read -p "(直接回车，自动获取最新稳定版本):" required_version
+	[[ -z "${required_version}" ]] && required_version==${latest_version}
 }
 
 get_url(){
@@ -110,7 +113,7 @@ delete_surplus_image(){
 	done
 	apt-get autoremove -y
 	if [[ "${surplus_total_image}" = "0" ]]; then
-		 echo -e "${Info} uninstall all surplus images successfully, continuing"
+		 echo -e "${Info} 成功删除其他内核 ！"
 	fi
 }
 
@@ -122,38 +125,38 @@ delete_surplus_headers(){
 	done
 	apt-get autoremove -y
 	if [[ "${surplus_total_headers}" = "0" ]]; then
-		 echo -e "${Info} uninstall all surplus headers successfully, continuing"
+		 echo -e "${Info} 成功删除其他 headers ！"
 	fi
 }
 
 install_image(){
 	if [[ -f "${image_name}" ]]; then
-		 echo -e "${Info} deb file exist"
-	else echo -e "${Info} downloading image" && wget ${image_url}
+		 echo -e "${Info} 内核文件已存在在 ！"
+	else echo -e "${Info} 开始下载内核 ！" && wget ${image_url}
 	fi
 	if [[ -f "${image_name}" ]]; then
-		 echo -e "${Info} installing image" && dpkg -i ${image_name}
-	else echo -e "${Error} image download failed, please check !" && exit 1
+		 echo -e "${Info} 开始安装内核 ！" && dpkg -i ${image_name}
+	else echo -e "${Error} 未找到内核文件 !" && exit 1
 	fi
 }
 
 install_headers(){
 	if [[ -f ${headers_all_name} ]]; then
-		 echo -e "${Info} deb file exist"
-	else echo -e "${Info} downloading headers_all" && wget ${headers_all_url}
+		 echo -e "${Info} headers_all 文件已存在 ！"
+	else echo -e "${Info} 开始下载 headers_all 文件 ！" && wget ${headers_all_url}
 	fi
 	if [[ -f ${headers_all_name} ]]; then
-		 echo -e "${Info} installing headers_all" && dpkg -i ${headers_all_name}
-	else echo -e "${Error} headers_all download failed, please check !" && exit 1
+		 echo -e "${Info} 开始安装 headers_all 文件 ！" && dpkg -i ${headers_all_name}
+	else echo -e "${Error} headers_all 未找到 !" && exit 1
 	fi
 
 	if [[ -f ${headers_bit_name} ]]; then
-		 echo -e "${Info} deb file exist"
-	else echo -e "${Info} downloading headers_bit" && wget ${headers_bit_url}
+		 echo -e "${Info} headers_bit 文件已存在 ！"
+	else echo -e "${Info} 开始下载 headers_bit 文件 ！" && wget ${headers_bit_url}
 	fi
 	if [[ -f ${headers_bit_name} ]]; then
-		 echo -e "${Info} installing headers_bit" && dpkg -i ${headers_bit_name}
-	else echo -e "${Error} headers_bit download failed, please check !" && exit 1
+		 echo -e "${Info} 开始安装 headers_bit" && dpkg -i ${headers_bit_name}
+	else echo -e "${Error} headers_bit 未找到 !" && exit 1
 	fi
 }
 
@@ -297,6 +300,15 @@ uninstall(){
 	echo -e "${Info} please remember ${reboot} to stop tcp_nanqinlang !"
 }
 
+#内核版本检查
+bbr_ver(){
+	deb_ver=`dpkg -l|grep linux-image | awk '{print $2}' | awk -F '-' '{print $3}' | grep '[4-9].[0-9]*.'`
+	latest_version_a=$(wget -qO- -t1 -T2 "http://kernel.ubuntu.com/~kernel-ppa/mainline/" | awk -F'\"v' '/v4.9.*/{print $2}' |grep -v '\-rc'| cut -d/ -f1 | sort -V | tail -1)
+	echo -e "${Info} 本机内核版本：${deb_ver}"
+	echo -e "${Info} 最新稳定版内核：${latest_version_a}"
+}
+
+echo -e "本脚本来自南琴浪，当前版本 V3.4.5.1 "
 echo -e "${Info} 选择你要使用的功能:
 
 1.安装内核 
@@ -305,6 +317,7 @@ echo -e "${Info} 选择你要使用的功能:
 4.卸载算法
 
 步骤：选择第 1 项---安装完毕后重启---然后选择第 2 项---最后运行第 3 项"
+bbr_ver
 read -p "输入数字以选择:" function
 
 while [[ ! "${function}" =~ ^[1-4]$ ]]
