@@ -14,6 +14,10 @@ filepath=$(cd "$(dirname "$0")"; pwd)
 file_1=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
 SSH_file="${file}/ssh_port.sh"
+lkl-Haproxy_C_file="${file}/tcp_nanqinlang-haproxy-centos.sh"
+lkl-Haproxy_D_file="${file}/tcp_nanqinlang-haproxy-debian.sh"
+lkl-Rinetd_C_file="${file}/tcp_nanqinlang-rinetd-centos.sh"
+lkl-Rinetd_D_file="${file}/tcp_nanqinlang-rinetd-debianorubuntu.sh"
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -144,8 +148,35 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 }
 Install_BBR(){
 	[[ ${release} = "centos" ]] && echo -e "${Error} 本脚本不支持 CentOS系统安装 BBR !" && exit 1
-	BBR_installation_status
-	bash "${BBR_file}"
+	echo -e "————————
+ 若使用Debian 9、Ubuntu 18.04之上版本号，可直接选择开启BBR而不需更换内核 
+ ———————— 
+ 
+ 1.直接开启
+ 2.更换内核开启
+ 
+	" && echo
+		stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
+		[[ -z "${bbr_ov_num}" ]] && echo "已取消..." && exit 1
+		if [[ ${bbr_ov_1_num} == "1" ]]; then
+			BBR_direct
+		elif [[ ${bbr_ov_1_num} == "2" ]]; then
+			BBR_installation_status
+			bash "${BBR_file}"
+		else
+			echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
+		fi	
+	fi
+}
+BBR_direct(){
+	echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+	echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+	sysctl -p
+	sysctl net.ipv4.tcp_available_congestion_control
+	echo "若显示以下信息，则表示开启成功，请重启服务器后运行检测命令 ${Green_font_prefix}
+ sysctl net.ipv4.tcp_available_congestion_control
+ net.ipv4.tcp_available_congestion_control = bbr cubic reno${Font_color_suffix}
+	" && echo
 }
 Start_BBR(){
 	BBR_installation_status
@@ -216,11 +247,11 @@ Lkl-Haproxy(){
 		if [[ ! -e ${lkl-Haproxy_C_file} ]]; then
 			echo -e "${Error} 没有发现 Lkl-Haproxy 脚本，开始下载..."
 			cd "${file}"
-			if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/ssh_port.sh; then
+			if ! wget -N --no-check-certificate https://github.com/Chennhaoo/Shell_Bash/raw/master/other/lkl-haproxy/tcp_nanqinlang-haproxy-centos.sh; then
 				echo -e "${Error} Lkl-Haproxy 脚本下载失败 !" && exit 1
 			else
 				echo -e "${Info} Lkl-Haproxy 脚本下载完成 !"
-				chmod +x tcp_nanqinlang-rinetd-centos.sh
+				chmod +x tcp_nanqinlang-haproxy-centos.sh
 			fi
 		fi
 		bash "${lkl-Haproxy_C_file}"
@@ -228,16 +259,45 @@ Lkl-Haproxy(){
 		if [[ ! -e ${lkl-Haproxy_D_file} ]]; then
 			echo -e "${Error} 没有发现 Lkl-Haproxy 脚本，开始下载..."
 			cd "${file}"
-			if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/ssh_port.sh; then
+			if ! wget -N --no-check-certificate https://github.com/Chennhaoo/Shell_Bash/raw/master/other/lkl-haproxy/tcp_nanqinlang-haproxy-debian.sh; then
 				echo -e "${Error} Lkl-Haproxy 脚本下载失败 !" && exit 1
 			else
 				echo -e "${Info} Lkl-Haproxy 脚本下载完成 !"
-				chmod +x tcp_nanqinlang-rinetd-debianorubuntu.sh
+				chmod +x tcp_nanqinlang-haproxy-debian.sh
 			fi
 		fi
 		bash "${lkl-Haproxy_D_file}"
 	fi
 }
+#OpenVZ BBR lkl-Rinetd
+Lkl-Rinetd(){
+	if [[ ${release} == "centos" ]]; then
+		if [[ ! -e ${lkl-Rinetd_C_file} ]]; then
+			echo -e "${Error} 没有发现 Lkl-Rinetd 脚本，开始下载..."
+			cd "${file}"
+			if ! wget -N --no-check-certificate https://github.com/Chennhaoo/Shell_Bash/raw/master/other/lkl-rinetd/tcp_nanqinlang-rinetd-centos.sh; then
+				echo -e "${Error} Lkl-Rinetd 脚本下载失败 !" && exit 1
+			else
+				echo -e "${Info} Lkl-Rinetd 脚本下载完成 !"
+				chmod +x tcp_nanqinlang-rinetd-centos.sh
+			fi
+		fi
+		bash "${lkl-Rinetd_C_file}"
+	else
+		if [[ ! -e ${lkl-Rinetd_D_file} ]]; then
+			echo -e "${Error} 没有发现 Lkl-Rinetd 脚本，开始下载..."
+			cd "${file}"
+			if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/other/lkl-rinetd/tcp_nanqinlang-rinetd-debianorubuntu.sh; then
+				echo -e "${Error} Lkl-Rinetd 脚本下载失败 !" && exit 1
+			else
+				echo -e "${Info} Lkl-Rinetd 脚本下载完成 !"
+				chmod +x tcp_nanqinlang-rinetd-debianorubuntu.sh
+			fi
+		fi
+		bash "${lkl-Rinetd_D_file}"
+	fi
+}
+
 
 #更新系统时间
 SYS_Time(){
