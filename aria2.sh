@@ -130,9 +130,9 @@ Download_aria2(){
 }
 Download_aria2_conf(){
 	mkdir "${file}" && cd "${file}"
-	wget --no-check-certificate -N "https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/other/Aria2/aria2.conf"
+	wget --no-check-certificate -N "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/other/aria2/aria2.conf"
 	[[ ! -s "aria2.conf" ]] && echo -e "${Error} Aria2 配置文件下载失败 !" && rm -rf "${file}" && exit 1
-	wget --no-check-certificate -N "https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/other/Aria2/dht.dat"
+	wget --no-check-certificate -N "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/other/aria2/dht.dat"
 	[[ ! -s "dht.dat" ]] && echo -e "${Error} Aria2 DHT文件下载失败 !" && rm -rf "${file}" && exit 1
 	echo '' > aria2.session
 	sed -i 's/^rpc-secret=DOUBIToyo/rpc-secret='$(date +%s%N | md5sum | head -c 20)'/g' ${aria2_conf}
