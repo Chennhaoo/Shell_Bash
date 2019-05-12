@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
@@ -9,7 +9,7 @@ export PATH
 #	Author: ChennHaoo
 #	Blog: https://www.anidays.com
 #=================================================
-sh_ver="1.1.10"
+sh_ver="1.0.0"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file_1=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -156,17 +156,16 @@ Install_BBR(){
  2.更换内核开启
  
 	" && echo
-		stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
-		[[ -z "${bbr_ov_num}" ]] && echo "已取消..." && exit 1
-		if [[ ${bbr_ov_1_num} == "1" ]]; then
-			BBR_direct
-		elif [[ ${bbr_ov_1_num} == "2" ]]; then
-			BBR_installation_status
-			bash "${BBR_file}"
-		else
-			echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
-		fi	
-	fi
+	stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
+	[[ -z "${bbr_ov_num}" ]] && echo "已取消..." && exit 1
+	if [[ ${bbr_ov_1_num} == "1" ]]; then
+		BBR_direct
+	elif [[ ${bbr_ov_1_num} == "2" ]]; then
+		BBR_installation_status
+		bash "${BBR_file}"
+	else
+		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
+	fi	
 }
 BBR_direct(){
 	echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
