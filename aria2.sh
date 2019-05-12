@@ -130,23 +130,23 @@ Download_aria2(){
 }
 Download_aria2_conf(){
 	mkdir "${file}" && cd "${file}"
-	wget --no-check-certificate -N "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/other/aria2/aria2.conf"
+	wget --no-check-certificate -N "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/other/Aria2/aria2.conf"
 	[[ ! -s "aria2.conf" ]] && echo -e "${Error} Aria2 配置文件下载失败 !" && rm -rf "${file}" && exit 1
-	wget --no-check-certificate -N "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/other/aria2/dht.dat"
+	wget --no-check-certificate -N "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/other/Aria2/dht.dat"
 	[[ ! -s "dht.dat" ]] && echo -e "${Error} Aria2 DHT文件下载失败 !" && rm -rf "${file}" && exit 1
 	echo '' > aria2.session
 	sed -i 's/^rpc-secret=DOUBIToyo/rpc-secret='$(date +%s%N | md5sum | head -c 20)'/g' ${aria2_conf}
 }
 Service_aria2(){
 	if [[ ${release} = "centos" ]]; then
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/service/aria2_centos -O /etc/init.d/aria2; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/Sever/aria2_centos -O /etc/init.d/aria2; then
 			echo -e "${Error} Aria2服务 管理脚本下载失败 !" && exit 1
 		fi
 		chmod +x /etc/init.d/aria2
 		chkconfig --add aria2
 		chkconfig aria2 on
 	else
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/service/aria2_debian -O /etc/init.d/aria2; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/Sever/aria2_debian -O /etc/init.d/aria2; then
 			echo -e "${Error} Aria2服务 管理脚本下载失败 !" && exit 1
 		fi
 		chmod +x /etc/init.d/aria2
@@ -561,25 +561,14 @@ Set_iptables(){
 		chmod +x /etc/network/if-pre-up.d/iptables
 	fi
 }
-Update_Shell(){
-	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/aria2.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1) && sh_new_type="github"
-	[[ -z ${sh_new_ver} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
-	if [[ -e "/etc/init.d/aria2" ]]; then
-		rm -rf /etc/init.d/aria2
-		Service_aria2
-	fi
-	wget -N --no-check-certificate "https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/aria2.sh" && chmod +x aria2.sh
-	echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
-}
 action=$1
 if [[ "${action}" == "update-bt-tracker" ]]; then
 	Update_bt_tracker_cron
 else
-echo && echo -e " Aria2 一键安装管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
+echo && echo -e " Aria2 一键安装管理脚本 ${Red_font_prefix}MOD_[v${sh_ver}]${Font_color_suffix}
   -- Toyo | ChennHaoo --
   
- ${Green_font_prefix} 0.${Font_color_suffix} 升级脚本
-————————————
+
  ${Green_font_prefix} 1.${Font_color_suffix} 安装 Aria2
  ${Green_font_prefix} 2.${Font_color_suffix} 更新 Aria2
  ${Green_font_prefix} 3.${Font_color_suffix} 卸载 Aria2
@@ -604,11 +593,8 @@ else
 	echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
 fi
 echo
-read -e -p " 请输入数字 [0-10]:" num
+read -e -p " 请输入数字 [1-10]:" num
 case "$num" in
-	0)
-	Update_Shell
-	;;
 	1)
 	Install_aria2
 	;;
@@ -640,7 +626,7 @@ case "$num" in
 	Update_bt_tracker
 	;;
 	*)
-	echo "请输入正确数字 [0-10]"
+	echo "请输入正确数字 [1-10]"
 	;;
 esac
 fi
