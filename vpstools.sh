@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 1.0.4
+#	Version: 1.0.5
 #	Author: ChennHaoo
 #	Blog: https://www.anidays.com
 #=================================================
@@ -159,25 +159,13 @@ Install_BBR(){
 	stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
 	[[ -z "${bbr_ov_1_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${bbr_ov_1_num} == "1" ]]; then
-		BBR_direct
+		Start_BBR
 	elif [[ ${bbr_ov_1_num} == "2" ]]; then
 		BBR_installation_status
 		bash "${BBR_file}"
 	else
 		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
 	fi	
-}
-BBR_direct(){
-	echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-	echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
-	sysctl -p
-	echo -e "${Info} BBR 配置完毕"
-	sysctl net.ipv4.tcp_available_congestion_control
-	echo -e "
- 若上方显示以下信息，则表示开启成功，请重启服务器后运行检测命令 
- ${Green_font_prefix}sysctl net.ipv4.tcp_available_congestion_control${Font_color_suffix}
- ${Green_font_prefix}net.ipv4.tcp_available_congestion_control = bbr cubic reno${Font_color_suffix}
-	" && echo
 }
 Start_BBR(){
 	BBR_installation_status
