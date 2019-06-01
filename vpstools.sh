@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 1.0.5
+#	Version: 1.0.6
 #	Author: ChennHaoo
 #	Blog: https://www.anidays.com
 #=================================================
 
-sh_ver="1.0.5"
+sh_ver="1.0.6"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -44,7 +44,7 @@ check_sys(){
 		release="debian"
 	elif cat /proc/version | grep -q -E -i "ubuntu"; then
 		release="ubuntu"
-	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
+	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat|Red Hat"; then
 		release="centos"
     fi
 	bit=`uname -m`
