@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 1.0.6
+#	Version: 1.0.7
 #	Author: ChennHaoo
 #	Blog: https://www.anidays.com
 #=================================================
 
-sh_ver="1.0.6"
+sh_ver="1.0.7"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -44,7 +44,7 @@ check_sys(){
 		release="debian"
 	elif cat /proc/version | grep -q -E -i "ubuntu"; then
 		release="ubuntu"
-	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat|Red Hat"; then
+	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
 		release="centos"
     fi
 	bit=`uname -m`
@@ -83,18 +83,18 @@ Centos_yum(){
 	yum update
 	cat /etc/redhat-release |grep 7\..*|grep -i centos>/dev/null
 	if [[ $? = 0 ]]; then
-		yum install -y vim unzip crond net-tools git
+		yum install -y vim unzip crond net-tools git nano
 	else
-		yum install -y vim unzip crond git
+		yum install -y vim unzip crond git nano
 	fi
 }
 Debian_apt(){
 	apt-get update
 	cat /etc/issue |grep 9\..*>/dev/null
 	if [[ $? = 0 ]]; then
-		apt-get install -y vim unzip cron net-tools git
+		apt-get install -y vim unzip cron net-tools git nano
 	else
-		apt-get install -y vim unzip cron git
+		apt-get install -y vim unzip cron git nano
 	fi
 }
 #依赖完毕
@@ -197,15 +197,16 @@ Configure_BBR_OV(){
 	echo -e "${Info} "
 	cat /dev/net/tun
 	echo -e "————————"
-	echo -e "若显示${Green_font_prefix} cat: /dev/net/tun: File descriptor in bad state ${Font_color_suffix}，则表示你的VPS支持此脚本，否则请发工单开启${Green_font_prefix} TUN/TAP 支持${Font_color_suffix}
+	echo -e "若显示${Red_font_prefix} cat: /dev/net/tun: File descriptor in bad state ${Font_color_suffix}，则表示你的VPS支持此脚本，否则请发工单开启${Red_font_prefix} TUN/TAP 支持${Font_color_suffix}
 	"
 	read -e -p "若VPS支持请继续 [y/N]（默认取消）：" unyn
 	[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 	if [[ ${unyn} == [Nn] ]]; then
 		echo && echo -e "${Info} 已取消..." && exit 1
 		else
+		clear
 		echo -e "
- ${Green_font_prefix}[lkl-haproxy] ${Font_color_suffix}与${Green_font_prefix} [lkl-rinetd] ${Font_color_suffix}只能二选一，两者同时安装后果自负！！
+ ${Red_font_prefix}Lkl-haproxy ${Font_color_suffix}与${Red_font_prefix} Lkl-rinetd ${Font_color_suffix}只能二选一，两者同时安装后果自负！！
  本脚本来自于南琴浪（https://github.com/tcp-nanqinlang/wiki/wiki），使用本脚本带有一定风险，请做好数据备份！ 
 ————————
 
@@ -222,7 +223,7 @@ Configure_BBR_OV(){
  Lkl-Rinetd
    端口修改文件：/home/tcp_nanqinlang
    支持：单端口，多个端口号用空格隔开 " && echo
-		stty erase '^H' && read -p "(默认: 取消):" bbr_ov_num
+		stty erase '^H' && read -p "请输入数字 (默认: 取消):" bbr_ov_num
 		[[ -z "${bbr_ov_num}" ]] && echo "已取消..." && exit 1
 		if [[ ${bbr_ov_num} == "1" ]]; then
 			Lkl-Haproxy
@@ -410,13 +411,15 @@ Install_UB(){
 
 
 
-
+#显示菜单
+check_sys
+[[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
   -- Toyo | ChennHaoo --
   
  ${Green_font_prefix} 1.${Font_color_suffix} 安装常用依赖
  ${Green_font_prefix} 2.${Font_color_suffix} 更新软件源
- ${Green_font_prefix} 3.${Font_color_suffix} 更新系统（慎重）
+ ${Green_font_prefix} 3.${Font_color_suffix} 更新系统及软件（慎重）
  ${Green_font_prefix} 4.${Font_color_suffix} 修改系统时间
 ————————————
  ${Green_font_prefix} 5.${Font_color_suffix} 修改 SSH端口（宝塔用户请勿使用）
