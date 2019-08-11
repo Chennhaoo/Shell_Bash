@@ -367,6 +367,16 @@ UnBanBTPTSPAM(){
 	rm -rf ban_iptables.sh
 }
 
+#修改当前用户密码
+PASSWORD(){
+echo -e "
+ ${Info} 请在下方输入新的密码，密码不会显示，输入完毕后回车确认！
+ 如不想修改，请使用 Ctrl+C 取消！ 
+———————— 
+ "
+passwd
+}
+
 #SuperBench测试
 Install_SB(){
 	if [[ ! -e ${SB_file} ]]; then
@@ -428,11 +438,12 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 8.${Font_color_suffix} 修改系统文件句柄数（慎用）
  ${Green_font_prefix} 9.${Font_color_suffix} 一键封禁 BT/PT/SPAM (iptables)
  ${Green_font_prefix} 10.${Font_color_suffix} 一键解封 BT/PT/SPAM (iptables)
+ ${Green_font_prefix} 11.${Font_color_suffix} 修改当前用户登录密码
 ————————————
- ${Green_font_prefix} 11.${Font_color_suffix} SuperBench 测试
- ${Green_font_prefix} 12.${Font_color_suffix} UnixBench 测试（时间较长）
+ ${Green_font_prefix} 12.${Font_color_suffix} SuperBench 测试
+ ${Green_font_prefix} 13.${Font_color_suffix} UnixBench 测试（时间较长）
 " && echo
-read -e -p " 请输入数字 [1-12]:" num
+read -e -p " 请输入数字 [1-13]:" num
 case "$num" in
 	1)
 	SYS_Tools
@@ -465,12 +476,15 @@ case "$num" in
 	UnBanBTPTSPAM
 	;;
 	11)
+	PASSWORD
+	;;	
+	12)
 	Install_SB
 	;;
-	12)
+	13)
 	Install_UB
 	;;
 	*)
-	echo "请输入正确数字 [1-12]"
+	echo "请输入正确数字 [1-13]"
 	;;
 esac
