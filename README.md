@@ -33,3 +33,7 @@
 
 
 
+用法
+`wget -N --no-check-certificate https://raw.githubusercontent.com/XXX.sh && chmod +x XXX.sh && bash XXX.sh`
+例子：
+`wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/vpstools.sh && chmod +x vpstools.sh && bash vpstools.sh`
