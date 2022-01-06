@@ -18,8 +18,8 @@
 
 
 文件名：bbr.sh<br>
-说明：Doubi大佬的BBR脚本<br>
-版本：1.0.22<br>
+说明：Doubi大佬和teddysun的BBR脚本<br>
+版本：1.1.0<br>
 
 
 文件名：aria2.sh<br>
@@ -29,11 +29,11 @@
 
 文件名：vpstools.sh<br>
 说明：VPS一键脚本，包含更新源、常规测试、BBR安装、时区设置等<br>
-版本：1.0.4<br>
+版本：1.0.8<br>
 
 
 
 用法 <br>
 `wget -N --no-check-certificate https://raw.githubusercontent.com/XXX.sh && chmod +x XXX.sh && bash XXX.sh` <br>
-例子： <br>
+vpstools例子： <br>
 `wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/vpstools.sh && chmod +x vpstools.sh && bash vpstools.sh`
