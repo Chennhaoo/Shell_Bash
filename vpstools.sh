@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 1.0.8_2022.01.04
+#	Version: 1.0.8
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="1.0.8_2022.01.04"
+sh_ver="1.0.8_2022.01.06"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -204,9 +204,9 @@ Install_BBR(){
 		echo -e "
  若使用Debian 9、Ubuntu 18.04之上版本号，可直接选择开启BBR而不需更换内核
 ———————— 
- 1.直接开启
- 2.更换内核开启(手动选择内核版本)
- 3.自动安装最新版内核
+ ${Green_font_prefix}1.${Font_color_suffix} 直接开启
+ ${Green_font_prefix}2.${Font_color_suffix} 更换内核开启(手动选择内核版本)
+ ${Green_font_prefix}3.${Font_color_suffix} 自动安装最新版内核
 	 " && echo
 		stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
 		[[ -z "${bbr_ov_1_num}" ]] && echo "已取消..." && exit 1
@@ -272,9 +272,9 @@ Configure_BBR_OV(){
  本脚本来自于南琴浪（https://github.com/tcp-nanqinlang/wiki/wiki），使用本脚本带有一定风险，请做好数据备份！ 
 ————————
 
- 1.Lkl-Haproxy（建议）
+ ${Green_font_prefix}1.${Font_color_suffix} Lkl-Haproxy（建议）
  
- 2.Lkl-Rinetd
+ ${Green_font_prefix}2.${Font_color_suffix} Lkl-Rinetd
  
 ———————— 
  Lkl-Haproxy
