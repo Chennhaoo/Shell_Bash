@@ -3,11 +3,11 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
 #=================================================
-#	System Required: Debian/Ubuntu
+#	System Required: Debian/Ubuntu/CentOS
 #	Description: TCP-BBR
-#	Version: 1.0.22
-#	Author: Toyo
-#	Blog: https://doub.io/wlzy-16/
+#	Version: 1.1.0
+#	Author:Toyo && ChennHaoo && teddysun
+#	Blog: https://github.com/Chennhaoo
 #=================================================
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
@@ -16,6 +16,7 @@ Error="${Red_font_prefix}[错误]${Font_color_suffix}"
 Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
+TBBR_file="/opt/bbr.sh"
 
 check_root(){
 	[[ $EUID != 0 ]] && echo -e "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作，请更换ROOT账号或使用 ${Green_background_prefix}sudo su${Font_color_suffix} 命令获取临时ROOT权限（执行后可能会提示输入当前账号的密码）。" && exit 1
@@ -200,6 +201,22 @@ startbbr(){
 	sleep 1s
 	bbrstatus
 }
+
+#CentOS系统和其他系统直接自动升级到最新内核后自动开启
+autobbr(){
+	check_root
+	rm -rf "${TBBR_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	echo -e "${Error} 没有发现 Teddysun_BBR 脚本，开始下载..."
+	cd "${file}"
+	if ! wget --no-check-certificate -O /opt/bbr.sh https://github.com/teddysun/across/raw/master/bbr.sh; then
+		echo -e "${Error} Teddysun_BBR 脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} Teddysun_BBR 脚本下载完成 !"
+		chmod 755 /opt/bbr.sh
+		bash "${TBBR_file}"
+	fi	
+}
+
 # 关闭BBR
 stopbbr(){
 	check_deb_off
@@ -226,11 +243,11 @@ check_sys
 action=$1
 [[ -z $1 ]] && action=install
 case "$action" in
-	install|start|stop|status)
+	install|start|stop|status|auto)
 	${action}bbr
 	;;
 	*)
 	echo "输入错误 !"
-	echo "用法: { install | start | stop | status }"
+	echo "用法: { install | start | stop | status | auto}"
 	;;
 esac

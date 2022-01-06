@@ -5,22 +5,25 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 1.0.7
+#	Version: 1.0.8_2022.01.04
 #	Author: ChennHaoo
-#	Blog: https://www.anidays.com
+#	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="1.0.7"
+sh_ver="1.0.8_2022.01.04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
 SSH_file="${file}/ssh_port.sh"
-SB_file="${file}/superbench.sh"
+BH_file="${file}/bench.sh"
 UB_file="${file}/unixbench.sh"
+YB_file="${file}/yabs.sh"
+LMT_file="${file}/check.sh"
 lkl_Haproxy_C_file="${file}/tcp_nanqinlang-haproxy-centos.sh"
 lkl_Haproxy_D_file="${file}/tcp_nanqinlang-haproxy-debian.sh"
 lkl_Rinetd_C_file="${file}/tcp_nanqinlang-rinetd-centos.sh"
 lkl_Rinetd_D_file="${file}/tcp_nanqinlang-rinetd-debianorubuntu.sh"
+BT_Panel="/www/server/panel"
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -122,9 +125,53 @@ Install_SSHPor(){
 	bash "${SSH_file}"
 }
 
-# BBR
+#安装BBR时进行系统判断
 Configure_BBR(){
-	echo && echo -e "  你要做什么？
+	if [[ ${release} == "centos" ]]; then
+		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
+		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
+		if [[ ${unyn} == [Nn] ]]; then
+			echo && echo -e "${Info} 已取消..." && exit 1
+		else
+			clear
+			CENTOS_BBR
+		fi	
+	else
+		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
+		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
+		if [[ ${unyn} == [Nn] ]]; then
+			echo && echo -e "${Info} 已取消..." && exit 1
+		else
+			clear
+			DEBIAN_BBR
+		fi
+	fi
+}
+
+#CentOS安装BBR
+CENTOS_BBR(){
+	echo && echo -e "  您的系统为 ${release}，您要做什么？
+	
+ ${Green_font_prefix}1.${Font_color_suffix} 安装 BBR（自动安装最新内核）
+ ${Green_font_prefix}2.${Font_color_suffix} 查看 BBR 状态" && echo
+echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
+1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)，请备份重要文件
+2. 本脚本仅支持 CentOS 系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
+3. 系统识别错误请选择取消" && echo
+	stty erase '^H' && read -p "(默认: 取消):" bbr_num
+	[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
+	if [[ ${bbr_num} == "1" ]]; then
+		Install_BBR
+	elif [[ ${bbr_num} == "2" ]]; then
+		Status_BBR
+	else
+		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
+	fi
+}
+
+# Debian/Ubuntu安装BBR
+DEBIAN_BBR(){
+	echo && echo -e "  您的系统为 ${release}，您要做什么？
 	
  ${Green_font_prefix}1.${Font_color_suffix} 安装 BBR
 ————————
@@ -133,8 +180,9 @@ Configure_BBR(){
  ${Green_font_prefix}4.${Font_color_suffix} 查看 BBR 状态" && echo
 echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)
-2. 本脚本仅支持 Debian / Ubuntu 系统更换内核，OpenVZ和Docker 不支持更换内核
-3. Debian 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}" && echo
+2. 本脚本仅支持 Debian/Ubuntu 系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
+3. Debian/Ubuntu 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}
+4. 系统识别错误请选择取消" && echo
 	stty erase '^H' && read -p "(默认: 取消):" bbr_num
 	[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${bbr_num} == "1" ]]; then
@@ -150,23 +198,31 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 	fi
 }
 Install_BBR(){
-	[[ ${release} = "centos" ]] && echo -e "${Error} 本脚本不支持 CentOS系统安装 BBR !" && exit 1
-	echo -e "
- 若使用Debian 9、Ubuntu 18.04之上版本号，可直接选择开启BBR而不需更换内核 
+	if [[ ${release} == "centos" ]]; then
+		Auto_BBR
+	else
+		echo -e "
+ 若使用Debian 9、Ubuntu 18.04之上版本号，可直接选择开启BBR而不需更换内核
 ———————— 
  1.直接开启
- 2.更换内核开启" && echo
-	stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
-	[[ -z "${bbr_ov_1_num}" ]] && echo "已取消..." && exit 1
-	if [[ ${bbr_ov_1_num} == "1" ]]; then
-		Start_BBR
-	elif [[ ${bbr_ov_1_num} == "2" ]]; then
-		BBR_installation_status
-		bash "${BBR_file}"
-	else
-		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
-	fi	
+ 2.更换内核开启(手动选择内核版本)
+ 3.自动安装最新版内核
+	 " && echo
+		stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
+		[[ -z "${bbr_ov_1_num}" ]] && echo "已取消..." && exit 1
+		if [[ ${bbr_ov_1_num} == "1" ]]; then
+			Start_BBR
+		elif [[ ${bbr_ov_1_num} == "2" ]]; then
+			BBR_installation_status
+			bash "${BBR_file}"
+		elif [[ ${bbr_ov_1_num} == "3" ]]; then
+			Auto_BBR
+		else
+			echo -e "${Error} 请输入正确的数字(1-3)" && exit 1
+		fi	
+	fi
 }
+
 Start_BBR(){
 	BBR_installation_status
 	bash "${BBR_file}" start
@@ -179,6 +235,12 @@ Status_BBR(){
 	BBR_installation_status
 	bash "${BBR_file}" status
 }
+#CentOS系统和其他系统直接自动升级到最新内核后自动开启
+Auto_BBR(){
+	BBR_installation_status
+	bash "${BBR_file}" auto
+}
+
 BBR_installation_status(){
 	if [[ ! -e ${BBR_file} ]]; then
 		echo -e "${Error} 没有发现 BBR脚本，开始下载..."
@@ -316,7 +378,9 @@ Update_SYS(){
 	if [[ ${unyn} == [Yy] ]]; then		
 		if [[ ${release} == "centos" ]]; then
 			echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
-			yum update
+			yum clean all
+			yum makecache
+			yum updat
 		else
 			echo -e "${Info} 开始更新软件源...."
 			apt-get update
@@ -327,10 +391,13 @@ Update_SYS(){
 		echo -e "${Info} 更新软件及系统完毕，请稍后自行重启 ！"
 	fi
 }
+
 #更新软件源
 Update_SYS_Y(){		
 	if [[ ${release} == "centos" ]]; then
 		echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
+		yum clean all
+		yum makecache
 		yum update
 	else
 		echo -e "${Info} 开始更新软件源...."
@@ -338,22 +405,40 @@ Update_SYS_Y(){
 	fi		
 	echo -e "${Info} 更新软件及系统完毕，请稍后自行重启 ！"
 }
-#修改系统文件句柄数
-SYS_limits(){
-	if cat /etc/security/limits.conf | grep -q -E -i "* soft nofile 51200"; then
-		echo -e "${Error} 系统已包含此优化 !"
-	else
-        SYS_limits_a       
+
+
+#宝塔5.9面板
+BT_Panel_5.9(){
+	[[ -e ${BT_Panel} ]] && echo -e "${Error} 宝塔面板已安装，请访问https://www.bt.cn/btcode.html查询卸载方法" && exit 1
+	echo -e "${Info} 开始安装..."
+	if [[ ${release} == "centos" ]]; then
+		echo "请确定您是 CENTOS 系统吗?[y/N]" && echo
+		stty erase '^H' && read -p "(默认: y):" unyn 
+		if [[ ${unyn} == [Nn] ]]; then
+			echo && echo -e "${Info} 已取消..." && exit 1
+			else
+			wget -O install.sh http://download.bt.cn/install/install.sh && sh install.sh
+		fi
+	elif [[ ${release} == "debian" ]]; then
+		echo "请确定您是 Debian 系统吗？[y/N]" && echo
+		stty erase '^H' && read -p "(默认: y):" unyn 
+		if [[ ${unyn} == [Nn] ]]; then
+			echo && echo -e "${Info} 已取消..." && exit 1
+			else
+			wget -O install.sh http://download.bt.cn/install/install-ubuntu.sh && bash install.sh
+		fi
+	elif [[ ${release} == "ubuntu" ]]; then
+		echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
+		stty erase '^H' && read -p "(默认: y):" unyn 
+		if [[ ${unyn} == [Nn] ]]; then
+			echo && echo -e "${Info} 已取消..." && exit 1
+			else
+			wget -O install.sh http://download.bt.cn/install/install-ubuntu.sh && sudo bash install.sh
+		fi
+	echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
 	fi
 }
-SYS_limits_a(){
-cat >> /etc/security/limits.conf << EOF
-* soft nofile 51200
-* hard nofile 51200
-EOF
-ulimit -n 51200
-echo -e "${Info} 优化完毕"
-}
+
 
 #封禁 BT PT SPAM
 BanBTPTSPAM(){
@@ -377,32 +462,59 @@ echo -e "
 passwd
 }
 
-#SuperBench测试
-Install_SB(){
-	if [[ ! -e ${SB_file} ]]; then
-		echo -e "${Error} 没有发现 SuperBench 测试脚本，开始下载..."
-		cd "${file}"
-		if ! wget -N --no-check-certificate https://raw.githubusercontent.com/oooldking/script/master/superbench.sh; then
-			echo -e "${Error} SuperBench 测试脚本下载失败 !" && exit 1
-		else
-			echo -e "${Info} SuperBench 测试脚本下载完成 !"
-			chmod +x superbench.sh
-		fi
+#Bench测试
+Install_BH(){
+	rm -rf "${BH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	echo -e "${Error} 没有发现 Bench 测试脚本，开始下载..."
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/teddysun/across/master/bench.sh; then
+		echo -e "${Error} Bench 测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} Bench 测试脚本下载完成 !"
+		chmod +x bench.sh
 	fi
-	bash "${SB_file}"
+	bash "${BH_file}"
+}
+
+
+#Yabs 测试(跑分)
+Install_YB(){
+	rm -rf "${YB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	echo -e "${Error} 没有发现 Yabs 测试脚本，开始下载..."
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/masonr/yet-another-bench-script/master/yabs.sh; then
+		echo -e "${Error} Yabs 测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} Yabs 测试脚本下载完成 !"
+		chmod +x yabs.sh
+	fi
+	bash "${YB_file}"
+}
+
+#流媒体解锁检测
+Install_LMT(){
+	rm -rf "${LMT_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	echo -e "${Error} 没有发现流媒体测试脚本，开始下载..."
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh; then
+		echo -e "${Error} 流媒体测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} 流媒体测试脚本下载完成 !"
+		chmod +x check.sh
+	fi
+	bash "${LMT_file}"
 }
 
 #UnixBench测试
 Install_UB(){
-	if [[ ! -e ${UB_file} ]]; then
-		echo -e "${Error} 没有发现 UnixBench 测试脚本，开始下载..."
-		cd "${file}"
-		if ! wget -N --no-check-certificate https://github.com/teddysun/across/raw/master/unixbench.sh; then
-			echo -e "${Error} UnixBench 测试脚本下载失败 !" && exit 1
-		else
-			echo -e "${Info} UnixBench 测试脚本下载完成 !"
-			chmod +x unixbench.sh
-		fi
+	rm -rf "${UB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	echo -e "${Error} 没有发现 UnixBench 测试脚本，开始下载..."
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://github.com/teddysun/across/raw/master/unixbench.sh; then
+		echo -e "${Error} UnixBench 测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} UnixBench 测试脚本下载完成 !"
+		chmod +x unixbench.sh
 	fi
 	echo "确定开始 UnixBench 测试吗 ？[y/N]" && echo
 	stty erase '^H' && read -p "(默认: y):" unyn 
@@ -435,15 +547,17 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 5.${Font_color_suffix} 修改 SSH端口（宝塔用户请勿使用）
  ${Green_font_prefix} 6.${Font_color_suffix} 配置 KVM BBR
  ${Green_font_prefix} 7.${Font_color_suffix} 配置 OpenVZ BBR
- ${Green_font_prefix} 8.${Font_color_suffix} 修改系统文件句柄数（慎用）
+ ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔5.9面板（不强制绑定）
  ${Green_font_prefix} 9.${Font_color_suffix} 一键封禁 BT/PT/SPAM (iptables)
  ${Green_font_prefix} 10.${Font_color_suffix} 一键解封 BT/PT/SPAM (iptables)
  ${Green_font_prefix} 11.${Font_color_suffix} 修改当前用户登录密码
 ————————————
- ${Green_font_prefix} 12.${Font_color_suffix} SuperBench 测试
- ${Green_font_prefix} 13.${Font_color_suffix} UnixBench 测试（时间较长）
+ ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
+ ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(快速跑分)
+ ${Green_font_prefix} 14.${Font_color_suffix} 流媒体解锁检测
+ ${Green_font_prefix} 15.${Font_color_suffix} UnixBench 测试（时间较长）
 " && echo
-read -e -p " 请输入数字 [1-13]:" num
+read -e -p " 请输入数字 [1-15]:" num
 case "$num" in
 	1)
 	SYS_Tools
@@ -467,7 +581,7 @@ case "$num" in
 	Configure_BBR_OV
 	;;
 	8)
-	SYS_limits
+	BT_Panel_5.9
 	;;
 	9)
 	BanBTPTSPAM
@@ -479,12 +593,18 @@ case "$num" in
 	PASSWORD
 	;;	
 	12)
-	Install_SB
+	Install_BH
 	;;
 	13)
+	Install_YB
+	;;
+	14)
+	Install_LMT
+	;;
+	15)
 	Install_UB
 	;;
 	*)
-	echo "请输入正确数字 [1-13]"
+	echo "请输入正确数字 [1-15]"
 	;;
 esac
