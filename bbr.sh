@@ -216,6 +216,11 @@ autobbr(){
 		bash "${TBBR_file}"
 	fi	
 }
+# CentOS查看BBR状态
+cnstatusbbr(){
+	bbrstatus
+	echo -e "${Error} BBR 未开启 !"
+}
 
 # 关闭BBR
 stopbbr(){
@@ -242,11 +247,11 @@ check_sys
 action=$1
 [[ -z $1 ]] && action=install
 case "$action" in
-	install|start|stop|status|auto)
+	install|start|stop|status|auto|cnstatus)
 	${action}bbr
 	;;
 	*)
 	echo "输入错误 !"
-	echo "用法: { install | start | stop | status | auto}"
+	echo "用法: { install | start | stop | status | auto|cnstatus}"
 	;;
 esac

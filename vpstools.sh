@@ -163,7 +163,8 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 	if [[ ${bbr_num} == "1" ]]; then
 		Install_BBR
 	elif [[ ${bbr_num} == "2" ]]; then
-		Status_BBR
+		BBR_installation_status
+		bash "${BBR_file}" cnstatus
 	else
 		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
 	fi
