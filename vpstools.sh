@@ -242,15 +242,14 @@ Auto_BBR(){
 }
 
 BBR_installation_status(){
-	if [[ ! -e ${BBR_file} ]]; then
-		echo -e "${Error} 没有发现 BBR脚本，开始下载..."
-		cd "${file}"
-		if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/bbr.sh; then
-			echo -e "${Error} BBR 脚本下载失败 !" && exit 1
-		else
-			echo -e "${Info} BBR 脚本下载完成 !"
-			chmod +x bbr.sh
-		fi
+	rm -rf "${BBR_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	echo -e "${Error} 没有发现 BBR脚本，开始下载..."
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/bbr.sh; then
+		echo -e "${Error} BBR 脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} BBR 脚本下载完成 !"
+		chmod +x bbr.sh
 	fi
 }
 
