@@ -239,7 +239,6 @@ statusbbr(){
 	echo -e "${Error} BBR 未开启 !"
 }
 check_sys
-[[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 action=$1
 [[ -z $1 ]] && action=install
 case "$action" in
