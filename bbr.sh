@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: Debian/Ubuntu/CentOS
 #	Description: TCP-BBR
-#	Version: 1.1.0
+#	Version: 2022.01.07
 #	Author:Toyo && ChennHaoo && teddysun
 #	Blog: https://github.com/Chennhaoo
 #=================================================
@@ -205,8 +205,11 @@ startbbr(){
 #CentOS系统和其他系统直接自动升级到最新内核后自动开启
 autobbr(){
 	check_root
-	rm -rf "${TBBR_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	echo -e "${Error} 没有发现 Teddysun_BBR 脚本，开始下载..."
+	if [[ -e ${TBBR_file} ]]; then
+		rm -rf "${TBBR_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 Teddysun_BBR 脚本，开始下载..."
+	fi
 	cd "${file}"
 	if ! wget --no-check-certificate -O /opt/bbr.sh https://github.com/teddysun/across/raw/master/bbr.sh; then
 		echo -e "${Error} Teddysun_BBR 脚本下载失败 !" && exit 1

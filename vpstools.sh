@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 1.0.8
+#	Version: 2022.01.07
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="1.0.8_2022.01.06"
+sh_ver="2022.01.07"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -243,8 +243,11 @@ Auto_BBR(){
 }
 
 BBR_installation_status(){
-	rm -rf "${BBR_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	echo -e "${Error} 没有发现 BBR脚本，开始下载..."
+	if [[ -e ${BBR_file} ]]; then
+		rm -rf "${BBR_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 BBR脚本，开始下载..."
+	fi
 	cd "${file}"
 	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/bbr.sh; then
 		echo -e "${Error} BBR 脚本下载失败 !" && exit 1
@@ -380,7 +383,7 @@ Update_SYS(){
 			echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
 			yum clean all
 			yum makecache
-			yum updat
+			yum update
 		else
 			echo -e "${Info} 开始更新软件源...."
 			apt-get update
@@ -395,9 +398,11 @@ Update_SYS(){
 #更新软件源
 Update_SYS_Y(){		
 	if [[ ${release} == "centos" ]]; then
-		echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
+		echo -e "${Info} 清空源缓存... "
 		yum clean all
+		echo -e "${Info} 更新源缓存... "
 		yum makecache
+		echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
 		yum update
 	else
 		echo -e "${Info} 开始更新软件源...."
@@ -439,19 +444,6 @@ BT_Panel_5.9(){
 	fi
 }
 
-
-#封禁 BT PT SPAM
-BanBTPTSPAM(){
-	wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/ban_iptables.sh && chmod +x ban_iptables.sh && bash ban_iptables.sh banall
-	rm -rf ban_iptables.sh
-}
-
-#解封 BT PT SPAM
-UnBanBTPTSPAM(){
-	wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/ban_iptables.sh && chmod +x ban_iptables.sh && bash ban_iptables.sh unbanall
-	rm -rf ban_iptables.sh
-}
-
 #修改当前用户密码
 PASSWORD(){
 echo -e "
@@ -464,8 +456,11 @@ passwd
 
 #Bench测试
 Install_BH(){
-	rm -rf "${BH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	echo -e "${Error} 没有发现 Bench 测试脚本，开始下载..."
+	if [[ -e ${BH_file} ]]; then
+		rm -rf "${BH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 Bench 测试脚本，开始下载..."
+	fi
 	cd "${file}"
 	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/teddysun/across/master/bench.sh; then
 		echo -e "${Error} Bench 测试脚本下载失败 !" && exit 1
@@ -479,8 +474,11 @@ Install_BH(){
 
 #Yabs 测试(跑分)
 Install_YB(){
-	rm -rf "${YB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	echo -e "${Error} 没有发现 Yabs 测试脚本，开始下载..."
+	if [[ -e ${YB_file} ]]; then
+		rm -rf "${YB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 Yabs 测试脚本，开始下载..."
+	fi
 	cd "${file}"
 	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/masonr/yet-another-bench-script/master/yabs.sh; then
 		echo -e "${Error} Yabs 测试脚本下载失败 !" && exit 1
@@ -493,8 +491,11 @@ Install_YB(){
 
 #流媒体解锁检测
 Install_LMT(){
-	rm -rf "${LMT_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	echo -e "${Error} 没有发现流媒体测试脚本，开始下载..."
+	if [[ -e ${LMT_file} ]]; then
+		rm -rf "${LMT_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现流媒体测试脚本，开始下载..."
+	fi
 	cd "${file}"
 	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh; then
 		echo -e "${Error} 流媒体测试脚本下载失败 !" && exit 1
@@ -507,8 +508,11 @@ Install_LMT(){
 
 #UnixBench测试
 Install_UB(){
-	rm -rf "${UB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	echo -e "${Error} 没有发现 UnixBench 测试脚本，开始下载..."
+	if [[ -e ${UB_file} ]]; then
+		rm -rf "${UB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 UnixBench 测试脚本，开始下载..."
+	fi
 	cd "${file}"
 	if ! wget -N --no-check-certificate https://github.com/teddysun/across/raw/master/unixbench.sh; then
 		echo -e "${Error} UnixBench 测试脚本下载失败 !" && exit 1
@@ -543,21 +547,19 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 2.${Font_color_suffix} 更新软件源
  ${Green_font_prefix} 3.${Font_color_suffix} 更新系统及软件（慎重）
  ${Green_font_prefix} 4.${Font_color_suffix} 修改系统时间
+ ${Green_font_prefix} 5.${Font_color_suffix} 修改当前用户登录密码 
 ————————————
- ${Green_font_prefix} 5.${Font_color_suffix} 修改 SSH端口（宝塔用户请勿使用）
  ${Green_font_prefix} 6.${Font_color_suffix} 配置 KVM BBR
  ${Green_font_prefix} 7.${Font_color_suffix} 配置 OpenVZ BBR
  ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔5.9面板（不强制绑定）
- ${Green_font_prefix} 9.${Font_color_suffix} 一键封禁 BT/PT/SPAM (iptables)
- ${Green_font_prefix} 10.${Font_color_suffix} 一键解封 BT/PT/SPAM (iptables)
- ${Green_font_prefix} 11.${Font_color_suffix} 修改当前用户登录密码
+ ${Green_font_prefix} 9.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改）
 ————————————
- ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
- ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(快速跑分)
- ${Green_font_prefix} 14.${Font_color_suffix} 流媒体解锁检测
- ${Green_font_prefix} 15.${Font_color_suffix} UnixBench 测试（时间较长）
+ ${Green_font_prefix} 10.${Font_color_suffix} Bench 测试
+ ${Green_font_prefix} 11.${Font_color_suffix} Yabs 测试(快速跑分)
+ ${Green_font_prefix} 12.${Font_color_suffix} 流媒体解锁检测
+ ${Green_font_prefix} 13.${Font_color_suffix} UnixBench 测试（时间较长）
 " && echo
-read -e -p " 请输入数字 [1-15]:" num
+read -e -p " 请输入数字 [1-13]:" num
 case "$num" in
 	1)
 	SYS_Tools
@@ -572,7 +574,7 @@ case "$num" in
 	SYS_Time
 	;;
 	5)
-	Install_SSHPor
+	PASSWORD
 	;;
 	6)
 	Configure_BBR
@@ -584,27 +586,21 @@ case "$num" in
 	BT_Panel_5.9
 	;;
 	9)
-	BanBTPTSPAM
-	;;
-	10)
-	UnBanBTPTSPAM
-	;;
-	11)
-	PASSWORD
+	Install_SSHPor
 	;;	
-	12)
+	10)
 	Install_BH
 	;;
-	13)
+	11)
 	Install_YB
 	;;
-	14)
+	12)
 	Install_LMT
 	;;
-	15)
+	13)
 	Install_UB
 	;;
 	*)
-	echo "请输入正确数字 [1-15]"
+	echo "请输入正确数字 [1-13]"
 	;;
 esac
