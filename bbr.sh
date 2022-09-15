@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: Debian/Ubuntu/CentOS
 #	Description: TCP-BBR
-#	Version: 2022.09.15
+#	Version: 2022.09.15_01
 #	Author:Toyo && ChennHaoo && teddysun
 #	Blog: https://github.com/Chennhaoo
 #=================================================
