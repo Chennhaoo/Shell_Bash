@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: Debian/Ubuntu/CentOS
 #	Description: TCP-BBR
-#	Version: 2022.01.07
+#	Version: 2022.09.15
 #	Author:Toyo && ChennHaoo && teddysun
 #	Blog: https://github.com/Chennhaoo
 #=================================================
@@ -40,9 +40,9 @@ check_sys(){
     fi
 }
 Set_latest_new_version(){
-	echo -e "请输入 要下载安装的Linux内核版本(BBR) ${Green_font_prefix}[ 格式: x.xx.xx ，例如: 4.9.96 ]${Font_color_suffix}
+	echo -e "请输入 要下载安装的Linux内核版本(BBR) ${Green_font_prefix}[ 格式: x.xx.xx ，例如: 5.10.143 ]${Font_color_suffix}
 ${Tip} 内核版本列表请去这里获取：${Green_font_prefix}[ http://kernel.ubuntu.com/~kernel-ppa/mainline/ ]${Font_color_suffix}
-建议使用${Green_font_prefix}稳定版本：4.9.XX ${Font_color_suffix}，4.9 以上版本属于测试版，稳定版与测试版同步更新，BBR 加速效果无区别。"
+建议使用${Green_font_prefix}稳定版本：5.10.XX ${Font_color_suffix}，5.15 以上版本属于测试版，稳定版与测试版同步更新，BBR 加速效果无区别。"
 	read -e -p "(直接回车，自动获取最新稳定版本):" latest_version
 	[[ -z "${latest_version}" ]] && get_latest_new_version
 	echo
@@ -50,7 +50,7 @@ ${Tip} 内核版本列表请去这里获取：${Green_font_prefix}[ http://kerne
 # 本段获取最新版本的代码来源自: https://teddysun.com/489.html
 get_latest_new_version(){
 	echo -e "${Info} 检测稳定版内核最新版本中..."
-	latest_version=$(wget -qO- -t1 -T2 "http://kernel.ubuntu.com/~kernel-ppa/mainline/" | awk -F'\"v' '/v4.9.*/{print $2}' |grep -v '\-rc'| cut -d/ -f1 | sort -V | tail -1)
+	latest_version=$(wget -qO- -t1 -T2 "http://kernel.ubuntu.com/~kernel-ppa/mainline/" | awk -F'\"v' '/v5.10.*/{print $2}' |grep -v '\-rc'| cut -d/ -f1 | sort -V | tail -1)
 	[[ -z ${latest_version} ]] && echo -e "${Error} 检测内核最新版本失败 !" && exit 1
 	echo -e "${Info} 稳定版内核最新版本为 : ${latest_version}"
 }
@@ -79,7 +79,7 @@ check_deb_off(){
 		if [[ "${deb_ver}" == "${latest_version}" ]]; then
 			echo -e "${Info} 检测到当前内核版本[${deb_ver}] 已满足要求，继续..."
 		else
-			echo -e "${Tip} 检测到当前内核版本[${deb_ver}] 支持开启BBR 但不是最新内核版本，可以使用${Green_font_prefix} bash ${file}/bbr.sh ${Font_color_suffix}来升级内核 !(注意：并不是越新的内核越好，4.9 以上版本的内核 目前皆为测试版，不保证稳定性，旧版本如使用无问题 建议不要升级！)"
+			echo -e "${Tip} 检测到当前内核版本[${deb_ver}] 支持开启BBR 但不是最新内核版本，可以使用${Green_font_prefix} bash ${file}/bbr.sh ${Font_color_suffix}来升级内核 !(注意：并不是越新的内核越好，5.15 以上版本的内核 目前皆为测试版，不保证稳定性，旧版本如使用无问题 建议不要升级！)"
 		fi
 	else
 		echo -e "${Error} 检测到当前内核版本[${deb_ver}] 不支持开启BBR，请使用${Green_font_prefix} bash ${file}/bbr.sh ${Font_color_suffix}来更换最新内核 !" && exit 1

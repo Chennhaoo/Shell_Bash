@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2022.01.07
+#	Version: 2022.09.15_03
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2022.01.07"
+sh_ver="2022.09.15_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -19,6 +19,7 @@ BH_file="${file}/bench.sh"
 UB_file="${file}/unixbench.sh"
 YB_file="${file}/yabs.sh"
 LMT_file="${file}/check.sh"
+SB_file="${file}/superbench.sh"
 lkl_Haproxy_C_file="${file}/tcp_nanqinlang-haproxy-centos.sh"
 lkl_Haproxy_D_file="${file}/tcp_nanqinlang-haproxy-debian.sh"
 lkl_Rinetd_C_file="${file}/tcp_nanqinlang-rinetd-centos.sh"
@@ -36,7 +37,7 @@ check_root(){
 #检查系统
 check_sys(){
 	if [[ -f /etc/redhat-release ]]; then
-		release="centos"
+		release="centos"	
 	elif cat /etc/issue | grep -q -E -i "debian"; then
 		release="debian"
 	elif cat /etc/issue | grep -q -E -i "ubuntu"; then
@@ -55,9 +56,14 @@ check_sys(){
 
 #安装常用依赖
 SYS_Tools(){
+	echo -e "${Info} 开始安装常用依赖...."
+	echo -e "${Info} 开始更新软件源...."
+	Update_SYS_Y
 	if [[ ${release} == "centos" ]]; then
+		echo -e "${Info} 开始安装常用软件...."
 		Centos_yum
 	else
+		echo -e "${Info} 开始安装常用软件...."
 		Debian_apt
 	fi
 	[[ ! -e "/usr/bin/unzip" ]] && echo -e "${Error} 依赖 unzip(解压压缩包) 安装失败，多半是软件包源的问题，请检查 !" && exit 1
@@ -70,6 +76,7 @@ SYS_Tools(){
 	else
 		/etc/init.d/cron restart
 	fi
+	echo -e "${Info} 常用软件安装完毕...."
 }
 Check_python(){
 	python_ver=`python -h`
@@ -83,21 +90,19 @@ Check_python(){
 	fi
 }
 Centos_yum(){
-	yum update
 	cat /etc/redhat-release |grep 7\..*|grep -i centos>/dev/null
 	if [[ $? = 0 ]]; then
-		yum install -y vim unzip crond net-tools git nano
+		yum install -y vim unzip crond net-tools git nano ca-certificates curl
 	else
-		yum install -y vim unzip crond git nano
+		yum install -y vim unzip crond git nano ca-certificates curl
 	fi
 }
 Debian_apt(){
-	apt-get update
 	cat /etc/issue |grep 9\..*>/dev/null
 	if [[ $? = 0 ]]; then
-		apt-get install -y vim unzip cron net-tools git nano
+		apt-get install -y vim unzip cron net-tools git nano ca-certificates curl
 	else
-		apt-get install -y vim unzip cron git nano
+		apt-get install -y vim unzip cron git nano ca-certificates curl
 	fi
 }
 #依赖完毕
@@ -207,7 +212,7 @@ Install_BBR(){
 ———————— 
  ${Green_font_prefix}1.${Font_color_suffix} 直接开启
  ${Green_font_prefix}2.${Font_color_suffix} 更换内核开启(手动选择内核版本)
- ${Green_font_prefix}3.${Font_color_suffix} 自动安装最新版内核
+ ${Green_font_prefix}3.${Font_color_suffix} 自动安装最新版内核（所有系统适用，推荐）
 	 " && echo
 		stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
 		[[ -z "${bbr_ov_1_num}" ]] && echo "已取消..." && exit 1
@@ -402,13 +407,15 @@ Update_SYS_Y(){
 		yum clean all
 		echo -e "${Info} 更新源缓存... "
 		yum makecache
-		echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
-		yum update
-	else
-		echo -e "${Info} 开始更新软件源...."
+	elif cat /etc/issue | grep -q -E "Debian GNU/Linux 10"; then
+		echo -e "${Info} 您使用的是Debian 10系统，开始更新软件源...."
+		apt-get --allow-releaseinfo-change update
+		apt-get update
+		else
+		echo -e "${Info} 您使用的是非Debian 10系统，开始更新软件源...."
 		apt-get update
 	fi		
-	echo -e "${Info} 更新软件及系统完毕，请稍后自行重启 ！"
+	echo -e "${Info} 软件源更新完毕..."
 }
 
 
@@ -417,7 +424,7 @@ BT_Panel_5.9(){
 	[[ -e ${BT_Panel} ]] && echo -e "${Error} 宝塔面板已安装，请访问https://www.bt.cn/btcode.html查询卸载方法" && exit 1
 	echo -e "${Info} 开始安装..."
 	if [[ ${release} == "centos" ]]; then
-		echo "请确定您是 CENTOS 系统吗?[y/N]" && echo
+		echo "请确定您是 CentOS 系统吗?[y/N]" && echo
 		stty erase '^H' && read -p "(默认: y):" unyn 
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
@@ -442,6 +449,94 @@ BT_Panel_5.9(){
 		fi
 	echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
 	fi
+}
+
+#宝塔7.7修改面板
+BT_Panel_7.7(){
+	[[ -e ${BT_Panel} ]] && echo -e "${Error} 宝塔面板已安装，请访问https://www.bt.cn/btcode.html查询卸载方法" && exit 1
+echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
+ 本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-1.html
+ 安装时会安装3.7版本Python，存在兼容风险。修改版存在一定风险或后门，安装前请备份好重要数据
+ 请多关注作者网站，如有漏洞更新可通过本脚本中${Green_font_prefix} 升级到宝塔7.7面板 ${Font_color_suffix}命令更新
+———————— 
+ 请问是否需要安装? [y/N]
+	 "
+	stty erase '^H' && read -p "(默认: y):" unyn 
+	if [[ ${unyn} == [Nn] ]]; then
+	echo && echo -e "${Info} 已取消..." && exit 1
+	else
+		echo -e "${Info} 开始安装..."
+		if [[ ${release} == "centos" ]]; then
+			echo "请确定您是 CentOS 系统吗?[y/N]" && echo
+			stty erase '^H' && read -p "(默认: y):" unyn 
+			if [[ ${unyn} == [Nn] ]]; then
+				echo && echo -e "${Info} 已取消..." && exit 1
+				else
+				wget -N --no-check-certificate https://download.btpanel.cm/optimization/install_panel.sh && sh install_panel.sh
+			fi
+		elif [[ ${release} == "debian" ]]; then
+			echo "请确定您是 Debian 系统吗？[y/N]" && echo
+			stty erase '^H' && read -p "(默认: y):" unyn 
+			if [[ ${unyn} == [Nn] ]]; then
+				echo && echo -e "${Info} 已取消..." && exit 1
+				else
+				wget -N --no-check-certificate https://download.btpanel.cm/optimization/install_panel.sh && bash install_panel.sh
+			fi
+		elif [[ ${release} == "ubuntu" ]]; then
+			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
+			stty erase '^H' && read -p "(默认: y):" unyn 
+			if [[ ${unyn} == [Nn] ]]; then
+				echo && echo -e "${Info} 已取消..." && exit 1
+				else
+				wget -N --no-check-certificate https://download.btpanel.cm/optimization/install_panel.sh && sudo bash install_panel.sh
+			fi
+		echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
+		fi		
+	fi	
+}
+
+#升级到宝塔7.7修改面板（更新）
+UPDATE_BT_Panel_7.7(){
+echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
+ 本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-1.html
+ 安装时会安装3.7版本Python，存在兼容风险。修改版存在一定风险或后门，安装前请备份好重要数据
+ 请多关注作者网站，如有漏洞更新可通过本脚本中${Green_font_prefix} 升级到宝塔7.7面板 ${Font_color_suffix}命令更新
+ 本脚本仅支持${Red_font_prefix} 由低版本升级或更新7.7版本 ${Font_color_suffix}，不支持降级，降版本请访问：https://www.baota.me/post-37.html
+———————— 
+ 请问是否需要升级? [y/N]
+	 "
+	stty erase '^H' && read -p "(默认: y):" unyn 
+	if [[ ${unyn} == [Nn] ]]; then
+	echo && echo -e "${Info} 已取消..." && exit 1
+	else
+		echo -e "${Info} 开始安装..."
+		if [[ ${release} == "centos" ]]; then
+			echo "请确定您是 CentOS 系统吗?[y/N]" && echo
+			stty erase '^H' && read -p "(默认: y):" unyn 
+			if [[ ${unyn} == [Nn] ]]; then
+				echo && echo -e "${Info} 已取消..." && exit 1
+				else
+				wget -N --no-check-certificate https://download.btpanel.cm/optimization/update_panel.sh && sh update_panel.sh
+			fi
+		elif [[ ${release} == "debian" ]]; then
+			echo "请确定您是 Debian 系统吗？[y/N]" && echo
+			stty erase '^H' && read -p "(默认: y):" unyn 
+			if [[ ${unyn} == [Nn] ]]; then
+				echo && echo -e "${Info} 已取消..." && exit 1
+				else
+				wget -N --no-check-certificate https://download.btpanel.cm/optimization/update_panel.sh && bash update_panel.sh
+			fi
+		elif [[ ${release} == "ubuntu" ]]; then
+			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
+			stty erase '^H' && read -p "(默认: y):" unyn 
+			if [[ ${unyn} == [Nn] ]]; then
+				echo && echo -e "${Info} 已取消..." && exit 1
+				else
+				wget -N --no-check-certificate https://download.btpanel.cm/optimization/update_panel.sh && sudo bash update_panel.sh
+			fi
+		echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
+		fi		
+	fi	
 }
 
 #修改当前用户密码
@@ -487,6 +582,40 @@ Install_YB(){
 		chmod +x yabs.sh
 	fi
 	bash "${YB_file}"
+}
+
+#SuperBench 测试(含基础信息、跑分、国际国内线路来回程)
+SuperBench_FULL(){
+	if [[ -e ${SB_file} ]]; then
+		rm -rf "${SB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 SuperBench 测试脚本，开始下载..."
+	fi
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://down.vpsaff.net/linux/speedtest/superbench.sh; then
+		echo -e "${Error} SuperBench 测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} SuperBench 测试脚本下载完成 !"
+		chmod +x "${SB_file}"
+	fi
+	bash "${SB_file}" 
+}
+
+#SuperBench 测试(仅测试基础信息、国内线路来回程)
+SuperBench_CN(){
+	if [[ -e ${SB_file} ]]; then
+		rm -rf "${SB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 SuperBench 测试脚本，开始下载..."
+	fi
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://down.vpsaff.net/linux/speedtest/superbench.sh; then
+		echo -e "${Error} SuperBench 测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} SuperBench 测试脚本下载完成 !"
+		chmod +x "${SB_file}"
+	fi
+	bash "${SB_file}" -f
 }
 
 #流媒体解锁检测
@@ -551,15 +680,20 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
 ————————————
  ${Green_font_prefix} 6.${Font_color_suffix} 配置 KVM BBR
  ${Green_font_prefix} 7.${Font_color_suffix} 配置 OpenVZ BBR
- ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔5.9面板（不强制绑定）
- ${Green_font_prefix} 9.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改）
+ ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔5.9面板（官方版，不强制绑定）
+ ${Green_font_prefix} 9.${Font_color_suffix} 安装宝塔7.7面板（修改版，不强制绑定）
+ ${Green_font_prefix} 10.${Font_color_suffix} 升级到/更新 宝塔7.7面板（修改版，不强制绑定，只能由低版本升级）
+ ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改）
 ————————————
- ${Green_font_prefix} 10.${Font_color_suffix} Bench 测试
- ${Green_font_prefix} 11.${Font_color_suffix} Yabs 测试(快速跑分)
- ${Green_font_prefix} 12.${Font_color_suffix} 流媒体解锁检测
- ${Green_font_prefix} 13.${Font_color_suffix} UnixBench 测试（时间较长）
+ ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
+ ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(快速跑分)
+ ${Green_font_prefix} 14.${Font_color_suffix} SuperBench 修改版测试(含基础信息、跑分、国际国内线路来回程)
+ ${Green_font_prefix} 15.${Font_color_suffix} SuperBench 修改版测试(仅测试基础信息，推荐)
+ ${Green_font_prefix} 16.${Font_color_suffix} 流媒体解锁检测
+ ${Green_font_prefix} 17.${Font_color_suffix} UnixBench_V4 测试（时间较长）
 " && echo
-read -e -p " 请输入数字 [1-13]:" num
+echo -e "${Info} 任何时候都可以通过Ctrl+C终止命令 !"
+read -e -p " 请输入数字 [1-17]:" num
 case "$num" in
 	1)
 	SYS_Tools
@@ -586,21 +720,33 @@ case "$num" in
 	BT_Panel_5.9
 	;;
 	9)
-	Install_SSHPor
-	;;	
+	BT_Panel_7.7
+	;;
 	10)
-	Install_BH
+	UPDATE_BT_Panel_7.7
 	;;
 	11)
-	Install_YB
-	;;
+	Install_SSHPor
+	;;	
 	12)
-	Install_LMT
+	Install_BH
 	;;
 	13)
+	Install_YB
+	;;
+	14)
+	SuperBench_FULL
+	;;
+	15)
+	SuperBench_CN
+	;;
+	16)
+	Install_LMT
+	;;
+	17)
 	Install_UB
 	;;
 	*)
-	echo "请输入正确数字 [1-13]"
+	echo "请输入正确数字 [1-17]"
 	;;
 esac
