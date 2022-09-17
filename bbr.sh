@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: Debian/Ubuntu/CentOS
 #	Description: TCP-BBR
-#	Version: 2022.09.15_01
+#	Version: 2022.09.17_01
 #	Author:Toyo && ChennHaoo && teddysun
 #	Blog: https://github.com/Chennhaoo
 #=================================================
@@ -220,14 +220,14 @@ autobbr(){
 	fi	
 }
 # CentOS查看BBR状态
-cnstatusbbr(){
+cntos_statusbbr(){
 	bbrstatus
 	echo -e "${Error} BBR 未开启 !"
 }
 
 # 关闭BBR
 stopbbr(){
-	check_deb_off
+#	check_deb_off
 	sed -i '/net\.core\.default_qdisc=fq/d' /etc/sysctl.conf
 	sed -i '/net\.ipv4\.tcp_congestion_control=bbr/d' /etc/sysctl.conf
 	sysctl -p
@@ -242,19 +242,19 @@ stopbbr(){
 }
 # 查看BBR状态
 statusbbr(){
-	check_deb_off
+#	check_deb_off
 	bbrstatus
 	echo -e "${Error} BBR 未开启 !"
 }
 check_sys
 action=$1
-[[ -z $1 ]] && action=install
+[[ -z $1 ]] && action=status
 case "$action" in
-	install|start|stop|status|auto|cnstatus)
+	install|start|stop|status|auto|cntos_status)
 	${action}bbr
 	;;
 	*)
 	echo "输入错误 !"
-	echo "用法: { install | start | stop | status | auto|cnstatus}"
+	echo "用法: { install | start | stop | status | auto | cntos_status}"
 	;;
 esac

@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2022.09.15_03
+#	Version: 2022.09.17_03
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2022.09.15_03"
+sh_ver="2022.09.17_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -25,6 +25,7 @@ lkl_Haproxy_D_file="${file}/tcp_nanqinlang-haproxy-debian.sh"
 lkl_Rinetd_C_file="${file}/tcp_nanqinlang-rinetd-centos.sh"
 lkl_Rinetd_D_file="${file}/tcp_nanqinlang-rinetd-debianorubuntu.sh"
 BT_Panel="/www/server/panel"
+Kern_Ver=$( uname -r )
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -107,6 +108,25 @@ Debian_apt(){
 }
 #依赖完毕
 
+#检查VPS虚拟状态，{if [[ ${virt} == "openvz" ]];}判断
+VPS_Virt(){
+	Update_SYS_Y
+	if [[ ${release} == "centos" ]]; then
+		virt=`virt-what`
+		virt=`virt-what`
+		if [[ -z ${virt} ]]; then
+			yum install virt-what -y
+			virt=`virt-what`
+		fi
+	else
+		virt=`virt-what`
+		if [[ -z ${virt} ]]; then
+			apt-get install virt-what -y
+			virt=`virt-what`
+		fi
+	fi
+}
+
 #修改SSH端口
 Install_SSHPor(){
 	[[ ${release} = "centos" ]] && echo -e "${Error} 本脚本不支持 CentOS系统 !" && exit 1
@@ -131,7 +151,7 @@ Install_SSHPor(){
 }
 
 #安装BBR时进行系统判断
-Configure_BBR(){
+Configure_BBR(){	
 	if [[ ${release} == "centos" ]]; then
 		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
@@ -155,9 +175,11 @@ Configure_BBR(){
 
 #CentOS安装BBR
 CENTOS_BBR(){
-	echo && echo -e "  您的系统为 ${release}，您要做什么？
+echo -e "  
+您的系统为 ${release}，您当前的内核版本为：${Green_font_prefix} $Kern_Ver ${Font_color_suffix}，您要做什么？
 	
- ${Green_font_prefix}1.${Font_color_suffix} 安装 BBR（自动安装最新内核）
+ ${Green_font_prefix}1.${Font_color_suffix} 安装最新版内核并开启 BBR
+————————
  ${Green_font_prefix}2.${Font_color_suffix} 查看 BBR 状态" && echo
 echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)，请备份重要文件
@@ -166,10 +188,10 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 	stty erase '^H' && read -p "(默认: 取消):" bbr_num
 	[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${bbr_num} == "1" ]]; then
-		Install_BBR
+		Auto_BBR
 	elif [[ ${bbr_num} == "2" ]]; then
 		BBR_installation_status
-		bash "${BBR_file}" cnstatus
+		bash "${BBR_file}" cntos_status
 	else
 		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
 	fi
@@ -177,55 +199,32 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 
 # Debian/Ubuntu安装BBR
 DEBIAN_BBR(){
-	echo && echo -e "  您的系统为 ${release}，您要做什么？
+echo -e "  
+您的系统为 ${release}，您当前的内核版本为：${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
 	
- ${Green_font_prefix}1.${Font_color_suffix} 安装 BBR
+ ${Green_font_prefix}1.${Font_color_suffix} 直接开启 BBR
+ ${Green_font_prefix}2.${Font_color_suffix} 安装最新版内核并开启 BBR
 ————————
- ${Green_font_prefix}2.${Font_color_suffix} 启动 BBR
  ${Green_font_prefix}3.${Font_color_suffix} 停止 BBR
  ${Green_font_prefix}4.${Font_color_suffix} 查看 BBR 状态" && echo
 echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
-1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)
-2. 本脚本仅支持 Debian/Ubuntu 系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
-3. Debian/Ubuntu 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}
-4. 系统识别错误请选择取消" && echo
+1. 若使用Debian 9、Ubuntu 18.04 等内核版本在${Green_font_prefix} 4.9.0 ${Font_color_suffix}及其之上的，可直接选择开启BBR而不需更换内核
+2. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)
+3. 本脚本仅支持 Debian/Ubuntu 系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
+4. Debian/Ubuntu 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}
+5. 系统识别错误请选择取消" && echo
 	stty erase '^H' && read -p "(默认: 取消):" bbr_num
 	[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${bbr_num} == "1" ]]; then
-		Install_BBR
-	elif [[ ${bbr_num} == "2" ]]; then
 		Start_BBR
+	elif [[ ${bbr_num} == "2" ]]; then
+		Auto_BBR
 	elif [[ ${bbr_num} == "3" ]]; then
 		Stop_BBR
 	elif [[ ${bbr_num} == "4" ]]; then
-		Status_BBR
+		Status_BBR		
 	else
 		echo -e "${Error} 请输入正确的数字(1-4)" && exit 1
-	fi
-}
-Install_BBR(){
-	if [[ ${release} == "centos" ]]; then
-		Auto_BBR
-	else
-		echo -e "
- 若使用Debian 9、Ubuntu 18.04之上版本号，可直接选择开启BBR而不需更换内核
-———————— 
- ${Green_font_prefix}1.${Font_color_suffix} 直接开启
- ${Green_font_prefix}2.${Font_color_suffix} 更换内核开启(手动选择内核版本)
- ${Green_font_prefix}3.${Font_color_suffix} 自动安装最新版内核（所有系统适用，推荐）
-	 " && echo
-		stty erase '^H' && read -p "(默认: 取消):" bbr_ov_1_num
-		[[ -z "${bbr_ov_1_num}" ]] && echo "已取消..." && exit 1
-		if [[ ${bbr_ov_1_num} == "1" ]]; then
-			Start_BBR
-		elif [[ ${bbr_ov_1_num} == "2" ]]; then
-			BBR_installation_status
-			bash "${BBR_file}"
-		elif [[ ${bbr_ov_1_num} == "3" ]]; then
-			Auto_BBR
-		else
-			echo -e "${Error} 请输入正确的数字(1-3)" && exit 1
-		fi	
 	fi
 }
 
@@ -243,6 +242,10 @@ Status_BBR(){
 }
 #CentOS系统和其他系统直接自动升级到最新内核后自动开启
 Auto_BBR(){
+	VPS_Virt
+	if [[ ${virt} == "openvz" ]]; then
+		echo -e "${Error} BBR 不支持 OpenVZ 虚拟化(不支持更换内核) !" && exit 1
+	fi
 	BBR_installation_status
 	bash "${BBR_file}" auto
 }
@@ -307,6 +310,10 @@ Configure_BBR_OV(){
 
 #OpenVZ BBR lkl-Haproxy
 Lkl-Haproxy(){
+	VPS_Virt
+	if [[ ${virt} == "kvm" ]]; then
+		echo -e "${Error} OpenVZ BBR 不支持 KVM 虚拟化!" && exit 1
+	fi
 	if [[ ${release} == "centos" ]]; then
 		if [[ ! -e ${lkl_Haproxy_C_file} ]]; then
 			echo -e "${Error} 没有发现 Lkl-Haproxy for CentOS 脚本，开始下载..."
@@ -335,6 +342,10 @@ Lkl-Haproxy(){
 }
 #OpenVZ BBR lkl-Rinetd
 Lkl-Rinetd(){
+	VPS_Virt
+	if [[ ${virt} == "kvm" ]]; then
+		echo -e "${Error} OpenVZ BBR 不支持 KVM 虚拟化!" && exit 1
+	fi
 	if [[ ${release} == "centos" ]]; then
 		if [[ ! -e ${lkl_Rinetd_C_file} ]]; then
 			echo -e "${Error} 没有发现 Lkl-Rinetd for CentOS 脚本，开始下载..."
@@ -421,6 +432,7 @@ Update_SYS_Y(){
 
 #宝塔5.9面板
 BT_Panel_5.9(){
+	clear
 	[[ -e ${BT_Panel} ]] && echo -e "${Error} 宝塔面板已安装，请访问https://www.bt.cn/btcode.html查询卸载方法" && exit 1
 	echo -e "${Info} 开始安装..."
 	if [[ ${release} == "centos" ]]; then
@@ -453,6 +465,7 @@ BT_Panel_5.9(){
 
 #宝塔7.7修改面板
 BT_Panel_7.7(){
+	clear
 	[[ -e ${BT_Panel} ]] && echo -e "${Error} 宝塔面板已安装，请访问https://www.bt.cn/btcode.html查询卸载方法" && exit 1
 echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
  本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-1.html
@@ -497,6 +510,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 
 #升级到宝塔7.7修改面板（更新）
 UPDATE_BT_Panel_7.7(){
+	clear
 echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
  本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-1.html
  安装时会安装3.7版本Python，存在兼容风险。修改版存在一定风险或后门，安装前请备份好重要数据
@@ -691,8 +705,10 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 15.${Font_color_suffix} SuperBench 修改版测试(仅测试基础信息，推荐)
  ${Green_font_prefix} 16.${Font_color_suffix} 流媒体解锁检测
  ${Green_font_prefix} 17.${Font_color_suffix} UnixBench_V4 测试（时间较长）
+
+
+ ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
-echo -e "${Info} 任何时候都可以通过Ctrl+C终止命令 !"
 read -e -p " 请输入数字 [1-17]:" num
 case "$num" in
 	1)
