@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2022.09.17_04
+#	Version: 2022.09.17_05
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2022.09.17_04"
+sh_ver="2022.09.17_05"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -153,7 +153,7 @@ Install_SSHPor(){
 #安装BBR时进行系统判断
 Configure_BBR(){	
 	if [[ ${release} == "centos" ]]; then
-		read -e -p "请问您的系统是否为${Green_font_prefix} ${release} ${Font_color_suffix}，正确请继续 [y/N]（默认取消）：" unyn
+		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
@@ -162,7 +162,7 @@ Configure_BBR(){
 			CENTOS_BBR
 		fi	
 	else
-		read -e -p "请问您的系统是否为${Green_font_prefix} ${release} ${Font_color_suffix}，正确请继续 [y/N]（默认取消）：" unyn
+		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
