@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2022.09.17_03
+#	Version: 2022.09.17_04
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2022.09.17_03"
+sh_ver="2022.09.17_04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -153,7 +153,7 @@ Install_SSHPor(){
 #安装BBR时进行系统判断
 Configure_BBR(){	
 	if [[ ${release} == "centos" ]]; then
-		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
+		read -e -p "请问您的系统是否为${Green_font_prefix} ${release} ${Font_color_suffix}，正确请继续 [y/N]（默认取消）：" unyn
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
@@ -162,7 +162,7 @@ Configure_BBR(){
 			CENTOS_BBR
 		fi	
 	else
-		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
+		read -e -p "请问您的系统是否为${Green_font_prefix} ${release} ${Font_color_suffix}，正确请继续 [y/N]（默认取消）：" unyn
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
@@ -176,7 +176,7 @@ Configure_BBR(){
 #CentOS安装BBR
 CENTOS_BBR(){
 echo -e "  
-您的系统为 ${release}，您当前的内核版本为：${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
+您的系统为${Green_font_prefix} ${release} ${Font_color_suffix}，您当前的内核版本为:${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
 	
  ${Green_font_prefix}1.${Font_color_suffix} 安装最新版内核并开启 BBR
 ————————
@@ -200,7 +200,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 # Debian/Ubuntu安装BBR
 DEBIAN_BBR(){
 echo -e "  
-您的系统为 ${release}，您当前的内核版本为：${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
+您的系统为${Green_font_prefix} ${release} ${Font_color_suffix}，您当前的内核版本为:${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
 	
  ${Green_font_prefix}1.${Font_color_suffix} 直接开启 BBR
  ${Green_font_prefix}2.${Font_color_suffix} 安装最新版内核并开启 BBR
