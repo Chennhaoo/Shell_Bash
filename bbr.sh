@@ -195,7 +195,7 @@ addsysctl(){
 	sysctl -p
 }
 startbbr(){
-	check_deb_off
+#	check_deb_off
 	bbrstatus
 	addsysctl
 	sleep 1s
