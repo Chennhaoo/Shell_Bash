@@ -176,7 +176,7 @@ Configure_BBR(){
 #CentOS安装BBR
 CENTOS_BBR(){
 echo -e "  
-您的系统为 ${release}，您当前的内核版本为：${Green_font_prefix} $Kern_Ver ${Font_color_suffix}，您要做什么？
+您的系统为 ${release}，您当前的内核版本为：${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
 	
  ${Green_font_prefix}1.${Font_color_suffix} 安装最新版内核并开启 BBR
 ————————
