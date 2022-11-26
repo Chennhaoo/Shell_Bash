@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2022.09.17_05
+#	Version: 2022.11.26_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2022.09.17_05"
+sh_ver="2022.11.26_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -485,7 +485,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://download.btpanel.cm/optimization/install_panel.sh && sh install_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && sh install_panel.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
@@ -493,7 +493,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://download.btpanel.cm/optimization/install_panel.sh && bash install_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && bash install_panel.sh
 			fi
 		elif [[ ${release} == "ubuntu" ]]; then
 			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
@@ -501,7 +501,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://download.btpanel.cm/optimization/install_panel.sh && sudo bash install_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && sudo bash install_panel.sh
 			fi
 		echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
 		fi		
@@ -530,7 +530,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://download.btpanel.cm/optimization/update_panel.sh && sh update_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && sh update_panel.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
@@ -538,7 +538,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://download.btpanel.cm/optimization/update_panel.sh && bash update_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && bash update_panel.sh
 			fi
 		elif [[ ${release} == "ubuntu" ]]; then
 			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
@@ -546,7 +546,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://download.btpanel.cm/optimization/update_panel.sh && sudo bash update_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && sudo bash update_panel.sh
 			fi
 		echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
 		fi		
