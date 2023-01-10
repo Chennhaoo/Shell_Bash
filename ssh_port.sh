@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: Debian/Ubuntu
 #	Description: SSH modify port
-#	Version: 1.0.0
+#	Version: 1.0.1
 #	Author: Toyo
 #	Blog: https://doub.io/linux-jc11/
 #=================================================
@@ -204,6 +204,7 @@ Set_iptables(){
 check_sys
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 check_installed_status
+apt-get install -y net-tools
 action=$1
 [[ -z $1 ]] && action=modify
 case "$action" in
