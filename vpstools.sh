@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2022.11.26_01
+#	Version: 2023.01.10_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2022.11.26_01"
+sh_ver="2023.01.10_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -402,10 +402,18 @@ Update_SYS(){
 			yum update
 		else
 			echo -e "${Info} 开始更新软件源...."
-			apt-get update
+			Update_SYS_Y
 			echo -e "${Info} 软件源更新完毕！"
 			echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
+			echo -e "${Info} 若更新含有内核、GRUB更新，请务必在后面执行 dist-upgrade，否则可能存在无法启动 ！"
 			apt-get upgrade
+			echo -e "${Info} 若存在内核、GRUB更新，请同意执行 dist-upgrade 命令！"
+			echo "确定要执行 dist-upgrade 命令吗 ？[y/N]" && echo
+			stty erase '^H' && read -p "(默认: n):" unyn
+			[[ -z ${unyn} ]] && echo && echo "已取消..." 
+				if [[ ${unyn} == [Yy] ]]; then	
+					apt-get dist-upgrade
+				fi
 		fi		
 		echo -e "${Info} 更新软件及系统完毕，请稍后自行重启 ！"
 	fi
@@ -697,7 +705,7 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔5.9面板（官方版，不强制绑定）
  ${Green_font_prefix} 9.${Font_color_suffix} 安装宝塔7.7面板（修改版，不强制绑定）
  ${Green_font_prefix} 10.${Font_color_suffix} 升级到/更新 宝塔7.7面板（修改版，不强制绑定，只能由低版本升级）
- ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改）
+ ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改/Centos无法使用）
 ————————————
  ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
  ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(快速跑分)
