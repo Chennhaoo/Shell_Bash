@@ -118,6 +118,7 @@ Direct_modification(){
 	if [[ -z ${PID} ]]; then
 			echo -e "${Error} SSH 启动失败 !${bak_text}" && exit 1
 		else
+			apt-get install -y net-tools
 			port_status=$(netstat -lntp|grep ssh|awk '{print $4}'|grep -w "${new_port}")
 			if [[ -z ${port_status} ]]; then
 				echo -e "${Error} SSH 端口修改失败 !${bak_text}" && exit 1
@@ -143,6 +144,7 @@ Conservative_modifications(){
 		if [[ -z ${PID} ]]; then
 			echo -e "${Error} SSH 启动失败 !${bak_text}" && exit 1
 		else
+			apt-get install -y net-tools
 			port_status=$(netstat -lntp|grep ssh|awk '{print $4}'|grep -w "${new_port}")
 			if [[ -z ${port_status} ]]; then
 				echo -e "${Error} SSH 端口添加失败 !${bak_text}" && exit 1
@@ -204,7 +206,6 @@ Set_iptables(){
 check_sys
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 check_installed_status
-apt-get install -y net-tools
 action=$1
 [[ -z $1 ]] && action=modify
 case "$action" in
