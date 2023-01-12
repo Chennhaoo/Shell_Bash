@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.01.12_02
+#	Version: 2023.01.12_03
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.01.12_02"
+sh_ver="2023.01.12_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -136,9 +136,10 @@ Install_SSHPor(){
 		echo && echo -e "${Info} 已取消..." && exit 1
 		else
 		if [[ -e ${SSH_file} ]]; then
-			rm -rf "${SSH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+				rm -rf "${SSH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
 			else
-			echo -e "${Error} 没有发现 SSH修改端口脚本，开始下载..."
+				echo -e "${Error} 没有发现 SSH修改端口脚本，开始下载..."
+			fi
 			cd "${file}"
 				if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/ssh_port.sh; then
 					echo -e "${Error} SSH 修改端口脚本下载失败 !" && exit 1
