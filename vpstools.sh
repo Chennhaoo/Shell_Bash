@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.01.12_03
+#	Version: 2023.01.12_04
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.01.12_03"
+sh_ver="2023.01.12_04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -134,20 +134,19 @@ Install_SSHPor(){
 	stty erase '^H' && read -p "(默认: y):" unyn 
 	if [[ ${unyn} == [Nn] ]]; then
 		echo && echo -e "${Info} 已取消..." && exit 1
-		else
+	else
 		if [[ -e ${SSH_file} ]]; then
 				rm -rf "${SSH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
 			else
 				echo -e "${Error} 没有发现 SSH修改端口脚本，开始下载..."
-			fi
-			cd "${file}"
-				if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/ssh_port.sh; then
-					echo -e "${Error} SSH 修改端口脚本下载失败 !" && exit 1
-				else
-					echo -e "${Info} SSH 修改端口脚本下载完成 !"
-					chmod +x ssh_port.sh
-				fi
 		fi
+		cd "${file}"
+			if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/ssh_port.sh; then
+				echo -e "${Error} SSH 修改端口脚本下载失败 !" && exit 1
+			else
+				echo -e "${Info} SSH 修改端口脚本下载完成 !"
+				chmod +x ssh_port.sh
+			fi
 	fi
 	echo -e "${Info} 开始修改..."
 	bash "${SSH_file}"
