@@ -5,16 +5,15 @@ export PATH
 #=================================================
 #	System Required: Debian/Ubuntu
 #	Description: SSH modify port
-#	Version: 1.0.2
+#	Version: 1.0.3
 #	Author: Toyo_ChennHaoo
 #	Blog: https://doub.io/linux-jc11/
 #=================================================
 
-sh_ver="1.0.2"
+sh_ver="1.0.3"
 CONF="/etc/ssh/sshd_config"
 SSH_init_1="/etc/init.d/ssh"
 SSH_init_2="/etc/init.d/sshd"
-Iptables_file="/etc/iptables.up.rules"
 if [[ -e ${SSH_init_1} ]]; then
 	SSH_init=${SSH_init_1}
 elif [[ -e ${SSH_init_2} ]]; then
@@ -210,46 +209,76 @@ end_ssh(){
 	Conservative_modifications "End"
 }
 Add_iptables_ACCEPT(){
-	if [[ ! -e ${Iptables_file} ]]; then
-	echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
-	else
+	v4iptables=`iptables -V`
+	v6iptables=`ip6tables -V`
+	if [[ ! -z ${v4iptables} ]]; then
+		v4iptables="iptables"
+		if [[ ! -z ${v6iptables} ]]; then
+			v6iptables="ip6tables"
+		fi
 		echo -e "${Info} 开始设置 iptables 防火墙"
-		iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${new_port} -j ACCEPT
-	fi
+		iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${new_port} -j ACCEPT		
+	else
+		echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
+	fi 
 }
 Del_iptables_ACCEPT(){
-	if [[ ! -e ${Iptables_file} ]]; then
-	echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
-	else
+	v4iptables=`iptables -V`
+	v6iptables=`ip6tables -V`
+	if [[ ! -z ${v4iptables} ]]; then
+		v4iptables="iptables"
+		if [[ ! -z ${v6iptables} ]]; then
+			v6iptables="ip6tables"
+		fi
 		echo -e "${Info} 开始设置 iptables 防火墙"
-		iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport ${port} -j ACCEPT
-	fi
+		iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport ${port} -j ACCEPT	
+	else
+		echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
+	fi 
 }
 Add_iptables_DROP(){
-	if [[ ! -e ${Iptables_file} ]]; then
-	echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
-	else
+	v4iptables=`iptables -V`
+	v6iptables=`ip6tables -V`
+	if [[ ! -z ${v4iptables} ]]; then
+		v4iptables="iptables"
+		if [[ ! -z ${v6iptables} ]]; then
+			v6iptables="ip6tables"
+		fi
 		echo -e "${Info} 开始设置 iptables 防火墙"
 		iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${port} -j DROP
-	fi	
+	else
+		echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
+	fi 
 }
 Del_iptables_DROP(){
-	if [[ ! -e ${Iptables_file} ]]; then
-	echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
-	else
+	v4iptables=`iptables -V`
+	v6iptables=`ip6tables -V`
+	if [[ ! -z ${v4iptables} ]]; then
+		v4iptables="iptables"
+		if [[ ! -z ${v6iptables} ]]; then
+			v6iptables="ip6tables"
+		fi
 		echo -e "${Info} 开始设置 iptables 防火墙"
 		iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport ${new_port} -j DROP
-	fi	
+	else
+		echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
+	fi 	
 }
 Set_iptables(){
-	if [[ ! -e ${Iptables_file} ]]; then
-	echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
-	else
+	v4iptables=`iptables -V`
+	v6iptables=`ip6tables -V`
+	if [[ ! -z ${v4iptables} ]]; then
+		v4iptables="iptables"
+		if [[ ! -z ${v6iptables} ]]; then
+			v6iptables="ip6tables"
+		fi
 		echo -e "${Info} 开始设置 iptables 防火墙"
 		iptables-save > /etc/iptables.up.rules
 		echo -e '#!/bin/bash\n/sbin/iptables-restore < /etc/iptables.up.rules' > /etc/network/if-pre-up.d/iptables
 		chmod +x /etc/network/if-pre-up.d/iptables
-	fi
+	else
+		echo -e "${Info} iptables 防火墙没有安装，将跳过防火墙设置"
+	fi 	
 }
 check_sys
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
