@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.01.12_04
+#	Version: 2023.02.14_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.01.12_04"
+sh_ver="2023.02.14_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -495,7 +495,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && sh install_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && bash install_panel.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
@@ -540,7 +540,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 				else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && sh update_panel.sh
+				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && bash update_panel.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
