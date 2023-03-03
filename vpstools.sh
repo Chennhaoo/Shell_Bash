@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.02.14_01
+#	Version: 2023.03.03_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.02.14_01"
+sh_ver="2023.03.03_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -605,7 +605,7 @@ Install_YB(){
 		echo -e "${Info} Yabs 测试脚本下载完成 !"
 		chmod +x yabs.sh
 	fi
-	bash "${YB_file}"
+	bash "${YB_file}" -5
 }
 
 #SuperBench 测试(含基础信息、跑分、国际国内线路来回程)
@@ -622,7 +622,7 @@ SuperBench_FULL(){
 		echo -e "${Info} SuperBench 测试脚本下载完成 !"
 		chmod +x "${SB_file}"
 	fi
-	bash "${SB_file}" 
+	bash "${SB_file}" --no-geekbench --speed
 }
 
 #SuperBench 测试(仅测试基础信息、国内线路来回程)
@@ -710,8 +710,8 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改/Centos无法使用）
 ————————————
  ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
- ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(快速跑分)
- ${Green_font_prefix} 14.${Font_color_suffix} SuperBench 修改版测试(含基础信息、跑分、国际国内线路来回程)
+ ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(快速跑分 Geekbench 5)
+ ${Green_font_prefix} 14.${Font_color_suffix} SuperBench 修改版测试(含基础信息、国际国内线路来回程、不含跑分)
  ${Green_font_prefix} 15.${Font_color_suffix} SuperBench 修改版测试(仅测试基础信息，推荐)
  ${Green_font_prefix} 16.${Font_color_suffix} 流媒体解锁检测
  ${Green_font_prefix} 17.${Font_color_suffix} UnixBench_V4 测试（时间较长）
