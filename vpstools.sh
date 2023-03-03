@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.03_01
+#	Version: 2023.03.03_02
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.03_01"
+sh_ver="2023.03.03_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -25,6 +25,7 @@ lkl_Haproxy_D_file="${file}/tcp_nanqinlang-haproxy-debian.sh"
 lkl_Rinetd_C_file="${file}/tcp_nanqinlang-rinetd-centos.sh"
 lkl_Rinetd_D_file="${file}/tcp_nanqinlang-rinetd-debianorubuntu.sh"
 BT_Panel="/www/server/panel"
+SpeedNet_file="${file}/bash"
 Kern_Ver=$( uname -r )
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
@@ -608,7 +609,24 @@ Install_YB(){
 	bash "${YB_file}" -5
 }
 
-#SuperBench 测试(含基础信息、跑分、国际国内线路来回程)
+#Yabs GB5跑分，不测试网速
+Install_YB_Lite(){
+	if [[ -e ${YB_file} ]]; then
+		rm -rf "${YB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 Yabs 测试脚本，开始下载..."
+	fi
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/masonr/yet-another-bench-script/master/yabs.sh; then
+		echo -e "${Error} Yabs 测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} Yabs 测试脚本下载完成 !"
+		chmod +x yabs.sh
+	fi
+	bash "${YB_file}" -i -5
+}
+
+#SuperBench 测试(含基础信息、国际线路回程、不含跑分)
 SuperBench_FULL(){
 	if [[ -e ${SB_file} ]]; then
 		rm -rf "${SB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
@@ -622,7 +640,7 @@ SuperBench_FULL(){
 		echo -e "${Info} SuperBench 测试脚本下载完成 !"
 		chmod +x "${SB_file}"
 	fi
-	bash "${SB_file}" --no-geekbench --speed
+	bash "${SB_file}" --no-geekbench
 }
 
 #SuperBench 测试(仅测试基础信息、国内线路来回程)
@@ -657,6 +675,23 @@ Install_LMT(){
 		chmod +x check.sh
 	fi
 	bash "${LMT_file}"
+}
+
+#三网回程快速测试（参考）
+Install_SpeedNet(){
+	if [[ -e ${SpeedNet_file} ]]; then
+		rm -rf "${SpeedNet_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现三网回程快速测试脚本，开始下载..."
+	fi
+	cd "${file}"
+	if ! wget -N --no-check-certificate http://tutu.ovh/bash/returnroute/test.sh; then
+		echo -e "${Error} 三网回程快速测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} 三网回程快速测试脚本下载完成 !"
+		chmod +x test.sh
+	fi
+	bash "${SpeedNet_file}"
 }
 
 #UnixBench测试
@@ -710,16 +745,19 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改/Centos无法使用）
 ————————————
  ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
- ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(快速跑分 Geekbench 5)
- ${Green_font_prefix} 14.${Font_color_suffix} SuperBench 修改版测试(含基础信息、国际国内线路来回程、不含跑分)
- ${Green_font_prefix} 15.${Font_color_suffix} SuperBench 修改版测试(仅测试基础信息，推荐)
- ${Green_font_prefix} 16.${Font_color_suffix} 流媒体解锁检测
- ${Green_font_prefix} 17.${Font_color_suffix} UnixBench_V4 测试（时间较长）
+ ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(Geekbench 5)
+ ${Green_font_prefix} 14.${Font_color_suffix} Yabs 测试(Geekbench 5，不含网速测试)
+ ${Green_font_prefix} 15.${Font_color_suffix} SuperBench 修改版测试(含基础信息、国际线路回程、不含跑分)
+ ${Green_font_prefix} 16.${Font_color_suffix} SuperBench 修改版测试(仅测试基础信息，推荐)
+ ${Green_font_prefix} 17.${Font_color_suffix} 流媒体解锁检测
+ ${Green_font_prefix} 18.${Font_color_suffix} 三网回程快速测试（参考）
+ ${Green_font_prefix} 19.${Font_color_suffix} UnixBench_V4 测试（时间较长）
+
 
 
  ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
-read -e -p " 请输入数字 [1-17]:" num
+read -e -p " 请输入数字 [1-19]:" num
 case "$num" in
 	1)
 	SYS_Tools
@@ -761,18 +799,24 @@ case "$num" in
 	Install_YB
 	;;
 	14)
-	SuperBench_FULL
+	Install_YB_Lite
 	;;
 	15)
-	SuperBench_CN
+	SuperBench_FULL
 	;;
 	16)
-	Install_LMT
+	SuperBench_CN
 	;;
 	17)
+	Install_LMT
+	;;
+	18)
+	Install_SpeedNet
+	;;
+	19)
 	Install_UB
 	;;
 	*)
-	echo "请输入正确数字 [1-17]"
+	echo "请输入正确数字 [1-19]"
 	;;
 esac
