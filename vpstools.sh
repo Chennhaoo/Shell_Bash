@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.04_03
+#	Version: 2023.03.04_04
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.04_03"
+sh_ver="2023.03.04_04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
