@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.03_02
+#	Version: 2023.03.04_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.03_02"
+sh_ver="2023.03.04_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -606,28 +606,38 @@ Install_YB(){
 		echo -e "${Info} Yabs 测试脚本下载完成 !"
 		chmod +x yabs.sh
 	fi
-	bash "${YB_file}" -5
-}
+	clear
+echo -e "${Green_font_prefix} [请选择Yabs需要的测试项] ${Font_color_suffix}
+ 1. 基本信息+磁盘性能+国际网速+Geekbench 5 跑分（默认）
+ 2. 基本信息+磁盘性能+国际网速+Geekbench 6 跑分
+ 3. 基本信息+磁盘性能+Geekbench 5 跑分
+ 4. 基本信息+磁盘性能+Geekbench 6 跑分
+ 5. 基本信息+Geekbench 5 跑分
+ 6. 基本信息+Geekbench 6 跑分
 
-#Yabs GB5跑分，不测试网速
-Install_YB_Lite(){
-	if [[ -e ${YB_file} ]]; then
-		rm -rf "${YB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	else	
-		echo -e "${Error} 没有发现 Yabs 测试脚本，开始下载..."
-	fi
-	cd "${file}"
-	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/masonr/yet-another-bench-script/master/yabs.sh; then
-		echo -e "${Error} Yabs 测试脚本下载失败 !" && exit 1
+ 注：x86主机默认使用Geekbench 4 跑分
+	 "
+	read -e -p "(默认: 1. 基本信息+磁盘性能+国际网速+Geekbench 5 跑分):" yabs_num
+	[[ -z "${yabs_num}" ]] && yabs_num="1"
+	if [[ ${yabs_num} == "1" ]]; then
+		bash "${YB_file}" -5
+	elif [[ ${yabs_num} == "2" ]]; then
+		bash "${YB_file}"
+	elif [[ ${yabs_num} == "3" ]]; then
+		bash "${YB_file}" -i -5
+	elif [[ ${yabs_num} == "4" ]]; then
+		bash "${YB_file}" -i
+	elif [[ ${yabs_num} == "5" ]]; then
+		bash "${YB_file}" -i -f -5
+	elif [[ ${yabs_num} == "6" ]]; then
+		bash "${YB_file}" -i -f
 	else
-		echo -e "${Info} Yabs 测试脚本下载完成 !"
-		chmod +x yabs.sh
+		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
 	fi
-	bash "${YB_file}" -i -5
 }
 
-#SuperBench 测试(含基础信息、国际线路回程、不含跑分)
-SuperBench_FULL(){
+#SuperBench 测试
+SuperBench(){
 	if [[ -e ${SB_file} ]]; then
 		rm -rf "${SB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
 	else	
@@ -641,23 +651,32 @@ SuperBench_FULL(){
 		chmod +x "${SB_file}"
 	fi
 	bash "${SB_file}" --no-geekbench
-}
 
-#SuperBench 测试(仅测试基础信息、国内线路来回程)
-SuperBench_CN(){
-	if [[ -e ${SB_file} ]]; then
-		rm -rf "${SB_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	else	
-		echo -e "${Error} 没有发现 SuperBench 测试脚本，开始下载..."
-	fi
-	cd "${file}"
-	if ! wget -N --no-check-certificate https://down.vpsaff.net/linux/speedtest/superbench.sh; then
-		echo -e "${Error} SuperBench 测试脚本下载失败 !" && exit 1
+	clear
+echo -e "${Green_font_prefix} [请选择SuperBench修改版需要的测试项] ${Font_color_suffix}
+ 1. 基本信息+基本流媒体解锁+存储性能+国内网速（默认）
+ 2. 基本信息+基本流媒体解锁+存储性能+国内国际网速+国际回程+Geekbench 6 跑分
+ 3. 基本信息+基本流媒体解锁+存储性能+国内国际网速+国际回程
+ 4. 仅国内网速
+ 5. 仅基本流媒体解锁
+	 "
+	read -e -p "(默认: 1. 基本信息+基本流媒体解锁+存储性能+国内网速):" SuperBench_num
+	[[ -z "${SuperBench_num}" ]] && SuperBench_num="1"
+	if [[ ${SuperBench_num} == "1" ]]; then
+		bash "${SB_file}" -f
+	elif [[ ${SuperBench_num} == "2" ]]; then
+		bash "${SB_file}"
+	elif [[ ${SuperBench_num} == "3" ]]; then
+		bash "${SB_file}" --no-geekbench
+	elif [[ ${SuperBench_num} == "4" ]]; then
+		echo -e "${Info} 开始测试 !"
+		bash "${SB_file}" --speed
+	elif [[ ${SuperBench_num} == "5" ]]; then
+		echo -e "${Info} 开始测试 !"
+		bash "${SB_file}" -m
 	else
-		echo -e "${Info} SuperBench 测试脚本下载完成 !"
-		chmod +x "${SB_file}"
+		echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
 	fi
-	bash "${SB_file}" -f
 }
 
 #流媒体解锁检测
@@ -745,19 +764,16 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改/Centos无法使用）
 ————————————
  ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
- ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试(Geekbench 5)
- ${Green_font_prefix} 14.${Font_color_suffix} Yabs 测试(Geekbench 5，不含网速测试)
- ${Green_font_prefix} 15.${Font_color_suffix} SuperBench 修改版测试(含基础信息、国际线路回程、不含跑分)
- ${Green_font_prefix} 16.${Font_color_suffix} SuperBench 修改版测试(仅测试基础信息，推荐)
- ${Green_font_prefix} 17.${Font_color_suffix} 流媒体解锁检测
- ${Green_font_prefix} 18.${Font_color_suffix} 三网回程快速测试（参考）
- ${Green_font_prefix} 19.${Font_color_suffix} UnixBench_V4 测试（时间较长）
-
+ ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试（跑分）
+ ${Green_font_prefix} 14.${Font_color_suffix} SuperBench 修改版测试（含ChatGPT检测）
+ ${Green_font_prefix} 15.${Font_color_suffix} 流媒体解锁检测（全面）
+ ${Green_font_prefix} 16.${Font_color_suffix} 三网回程快速测试（参考）
+ ${Green_font_prefix} 17.${Font_color_suffix} UnixBench_V4 测试（时间较长）
 
 
  ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
-read -e -p " 请输入数字 [1-19]:" num
+read -e -p " 请输入数字 [1-17]:" num
 case "$num" in
 	1)
 	SYS_Tools
@@ -799,24 +815,18 @@ case "$num" in
 	Install_YB
 	;;
 	14)
-	Install_YB_Lite
+	SuperBench
 	;;
 	15)
-	SuperBench_FULL
-	;;
-	16)
-	SuperBench_CN
-	;;
-	17)
 	Install_LMT
 	;;
-	18)
+	16)
 	Install_SpeedNet
 	;;
-	19)
+	17)
 	Install_UB
 	;;
 	*)
-	echo "请输入正确数字 [1-19]"
+	echo "请输入正确数字 [1-17]"
 	;;
 esac
