@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.04_06
+#	Version: 2023.03.04_07
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.04_06"
+sh_ver="2023.03.04_07"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -656,11 +656,11 @@ echo -e "${Green_font_prefix} [请选择 Yabs 需要的测试项] ${Font_color_s
 	elif [[ ${yabs_num} == "8" ]]; then
 		echo -e "${Info} 您选择的是：基本信息+磁盘性能，已开始测试 !
 		"		
-		bash "${YB_file}" -i -f -G
+		bash "${YB_file}" -i -g
 	elif [[ ${yabs_num} == "9" ]]; then
 		echo -e "${Info} 您选择的是：基本信息+国际网速，已开始测试 !
 		"		
-		bash "${YB_file}" -f -G
+		bash "${YB_file}" -f -g
 	else
 		echo -e "${Error} 请输入正确的数字 [1-9]" && exit 1
 	fi
