@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.04_04
+#	Version: 2023.03.04_05
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.04_04"
+sh_ver="2023.03.04_05"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr.sh"
@@ -621,28 +621,28 @@ echo -e "${Green_font_prefix} [请选择Yabs需要的测试项] ${Font_color_suf
 	[[ -z "${yabs_num}" ]] && yabs_num="1"
 	clear
 	if [[ ${yabs_num} == "1" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+磁盘性能+国际网速+Geekbench 5 跑分，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+磁盘性能+国际网速+Geekbench 5 跑分，已开始测试 !
+		"	
 		bash "${YB_file}" -5
 	elif [[ ${yabs_num} == "2" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+磁盘性能+国际网速+Geekbench 6 跑分，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+磁盘性能+国际网速+Geekbench 6 跑分，已开始测试 !
+		"		
 		bash "${YB_file}"
 	elif [[ ${yabs_num} == "3" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+磁盘性能+Geekbench 5 跑分，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+磁盘性能+Geekbench 5 跑分，已开始测试 !
+		"		
 		bash "${YB_file}" -i -5
 	elif [[ ${yabs_num} == "4" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+磁盘性能+Geekbench 6 跑分，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+磁盘性能+Geekbench 6 跑分，已开始测试 !
+		"		
 		bash "${YB_file}" -i
 	elif [[ ${yabs_num} == "5" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+Geekbench 5 跑分，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+Geekbench 5 跑分，已开始测试 !
+		"		
 		bash "${YB_file}" -i -f -5
 	elif [[ ${yabs_num} == "6" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+Geekbench 6 跑分，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+Geekbench 6 跑分，已开始测试 !
+		"		
 		bash "${YB_file}" -i -f
 	else
 		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
@@ -663,8 +663,6 @@ SuperBench(){
 		echo -e "${Info} SuperBench 测试脚本下载完成 !"
 		chmod +x "${SB_file}"
 	fi
-	bash "${SB_file}" --no-geekbench
-
 	clear
 echo -e "${Green_font_prefix} [请选择SuperBench修改版需要的测试项] ${Font_color_suffix}
  1. 基本信息+基本流媒体解锁+存储性能+国内网速（默认）
@@ -677,24 +675,23 @@ echo -e "${Green_font_prefix} [请选择SuperBench修改版需要的测试项] $
 	[[ -z "${SuperBench_num}" ]] && SuperBench_num="1"
 	clear
 	if [[ ${SuperBench_num} == "1" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+基本流媒体解锁+存储性能+国内网速，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+基本流媒体解锁+存储性能+国内网速，已开始测试 !
+		"		
 		bash "${SB_file}" -f
 	elif [[ ${SuperBench_num} == "2" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+基本流媒体解锁+存储性能+国内国际网速+国际回程+Geekbench 6 跑分，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+基本流媒体解锁+存储性能+国内国际网速+国际回程+Geekbench 6 跑分，已开始测试 !
+		"		
 		bash "${SB_file}"
 	elif [[ ${SuperBench_num} == "3" ]]; then
-		echo -e "${Info} 您选择的是：基本信息+基本流媒体解锁+存储性能+国内国际网速+国际回程，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：基本信息+基本流媒体解锁+存储性能+国内国际网速+国际回程，已开始测试 !
+		"		
 		bash "${SB_file}" --no-geekbench
 	elif [[ ${SuperBench_num} == "4" ]]; then
-		echo -e "${Info} 您选择的是：仅国内网速，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：仅国内网速，已开始测试 !"		
 		bash "${SB_file}" --speed
 	elif [[ ${SuperBench_num} == "5" ]]; then
-		echo -e "${Info} 您选择的是：仅基本流媒体解锁，已开始测试 !"
-		
+		echo -e "${Info} 您选择的是：仅基本流媒体解锁，已开始测试 !
+		"		
 		bash "${SB_file}" -m
 	else
 		echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
