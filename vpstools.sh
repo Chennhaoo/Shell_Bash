@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.06_02
+#	Version: 2023.03.06_03
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.06_02"
+sh_ver="2023.03.06_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -276,6 +276,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 	elif [[ ${bbr_num} == "2" ]]; then
 		BBR_installation_status
 		bash "${BBR_file}" cntos_status
+
 	else
 		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
 	fi
@@ -777,6 +778,7 @@ echo -e "${Green_font_prefix} [请选择 Yabs 需要的测试项] ${Font_color_s
  7. 基本信息+Geekbench 4 跑分
  8. 基本信息+磁盘性能
  9. 基本信息+国际网速
+ 10. 取消测试
 
  注： 
  x86主机默认使用Geekbench 4 跑分
@@ -821,8 +823,10 @@ echo -e "${Green_font_prefix} [请选择 Yabs 需要的测试项] ${Font_color_s
 		echo -e "${Info} 您选择的是：基本信息+国际网速，已开始测试 !
 		"		
 		bash "${YB_file}" -f -g
+	elif [[ ${yabs_num} == "10" ]]; then
+		echo -e "${Info} 已取消测试 ！" && exit 1		
 	else
-		echo -e "${Error} 请输入正确的数字 [1-9]" && exit 1
+		echo -e "${Error} 请输入正确的数字 [1-10]" && exit 1
 	fi
 	#测试完毕后删除脚本
 	rm -rf "${YB_file}"
@@ -860,6 +864,7 @@ echo -e "${Green_font_prefix} [请选择 SuperBench 修改版需要的测试项]
  3. 基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内国际网速+国际回程
  4. 仅国内网速
  5. 仅基本流媒体解锁（含ChatGPT）
+ 6. 取消测试
 
  注：若需Geekbench 6 跑分，内存最好不小于 2 GB
 	 "
@@ -885,8 +890,10 @@ echo -e "${Green_font_prefix} [请选择 SuperBench 修改版需要的测试项]
 		echo -e "${Info} 您选择的是：仅基本流媒体解锁（含ChatGPT），已开始测试 !
 		"		
 		bash "${SB_file}" -m
+	elif [[ ${SuperBench_num} == "6" ]]; then
+		echo -e "${Info} 已取消测试 ！" && exit 1		
 	else
-		echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
+		echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
 	fi
 	#测试完毕后删除脚本
 	rm -rf "${file}/superbench.log"
@@ -916,6 +923,7 @@ echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
  2. SpeedTest.net三网回程网速测速（单线程/8线程）
  3. 三网回程路由测试（BestTrace库）
  4. 指定 IP 回程路由测试（BestTrace库）
+ 5. 取消测试
 	 "
 	read -e -p "(默认: 1. 三网回程快速测试 结果仅供参考):" SpeedNet_num
 	[[ -z "${SpeedNet_num}" ]] && SpeedNet_num="1"
@@ -935,8 +943,10 @@ echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
 	elif [[ ${SpeedNet_num} == "4" ]]; then
 		echo -e "${Info} 您选择的是：指定 IP 回程路由测试（BestTrace库），已开始测试 !"		
 		bash <(curl -sSL https://raw.githubusercontent.com/spiritLHLS/ecs/main/return.sh)
+	elif [[ ${SpeedNet_num} == "5" ]]; then
+		echo -e "${Info} 已取消测试 ！" && exit 1	
 	else
-		echo -e "${Error} 请输入正确的数字 [1-4]" && exit 1
+		echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
 	fi
 }
 
