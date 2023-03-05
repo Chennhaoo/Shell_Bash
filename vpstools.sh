@@ -5,27 +5,25 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.04_07
+#	Version: 2023.03.06_02
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.04_07"
+sh_ver="2023.03.06_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
-BBR_file="${file}/bbr.sh"
+BBR_file="${file}/bbr_CH.sh"
 SSH_file="${file}/ssh_port.sh"
 BH_file="${file}/bench.sh"
 UB_file="${file}/unixbench.sh"
 YB_file="${file}/yabs.sh"
-LMT_file="${file}/check.sh"
 SB_file="${file}/superbench.sh"
 lkl_Haproxy_C_file="${file}/tcp_nanqinlang-haproxy-centos.sh"
 lkl_Haproxy_D_file="${file}/tcp_nanqinlang-haproxy-debian.sh"
 lkl_Rinetd_C_file="${file}/tcp_nanqinlang-rinetd-centos.sh"
 lkl_Rinetd_D_file="${file}/tcp_nanqinlang-rinetd-debianorubuntu.sh"
 BT_Panel="/www/server/panel"
-SpeedNet_file="${file}/test.sh"
 Kern_Ver=$( uname -r )
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
@@ -36,6 +34,7 @@ Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
 check_root(){
 	[[ $EUID != 0 ]] && echo -e "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作，请更换ROOT账号或使用 ${Green_background_prefix}sudo su${Font_color_suffix} 命令获取临时ROOT权限（执行后可能会提示输入当前账号的密码）。" && exit 1
 }
+
 #检查系统
 check_sys(){
 	if [[ -f /etc/redhat-release ]]; then
@@ -53,14 +52,58 @@ check_sys(){
 	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
 		release="centos"
     fi
+	[ -z "${release}" ] && echo -e "${Error} 未安装操作系统 !" && exit 1
 	bit=`uname -m`
+
+	# 主机架构判断
+	ARCH=$(uname -m)
+	if [[ $ARCH = *x86_64* ]]; then
+		# 64-bit kernel
+		bit="x64"
+	elif [[ $ARCH = *i386* ]]; then
+		# 32-bit kernel
+		bit="x86"
+	elif [[ $ARCH = *aarch* || $ARCH = *arm* ]]; then
+		KERNEL_BIT=`getconf LONG_BIT`
+		if [[ $KERNEL_BIT = *64* ]]; then
+			# ARM 64-bit kernel
+			bit="aarch64"
+		else
+			# ARM 32-bit kernel
+			bit="arm"
+		fi
+		echo -e "\nARM 实验性质平台"
+	else
+		# 未知内核 
+		echo -e "${Error} 无法受支持的系统 !" && exit 1
+	fi
+}
+
+#变量带入区，用于某些变量转换为文本输出
+input_BL(){
+	#显示当前系统版本
+	VPS_Virt
+	OS_input="$(Os_Full)_${bit}_${virt}"
+}
+
+#获取操作系统全版本号
+Os_Full(){
+	[ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
+    [ -f /etc/os-release ] && awk -F'[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
+    [ -f /etc/lsb-release ] && awk -F'[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
+}
+
+#获取操作系统大版本号
+Os_Ver(){
+    local main_ver="$( echo $(Os_Full) | grep -oE  "[0-9.]+")"
+    printf -- "%s" "${main_ver%%.*}"
 }
 
 #安装常用依赖
 SYS_Tools(){
 	echo -e "${Info} 开始安装常用依赖...."
 	echo -e "${Info} 开始更新软件源...."
-	Update_SYS_Y
+	Update_SYS_Yuan
 	if [[ ${release} == "centos" ]]; then
 		echo -e "${Info} 开始安装常用软件...."
 		Centos_yum
@@ -72,11 +115,13 @@ SYS_Tools(){
 	Check_python
 	echo "nameserver 8.8.8.8" > /etc/resolv.conf
 	echo "nameserver 1.1.1.1" >> /etc/resolv.conf
-	\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	SYS_Time
 	if [[ ${release} == "centos" ]]; then
 		/etc/init.d/crond restart
+		echo -e "${Info} 定时任务服务重启完毕...."
 	else
 		/etc/init.d/cron restart
+		echo -e "${Info} 定时任务服务重启完毕...."
 	fi
 	echo -e "${Info} 常用软件安装完毕...."
 }
@@ -109,21 +154,29 @@ Debian_apt(){
 }
 #依赖完毕
 
-#检查VPS虚拟状态，{if [[ ${virt} == "openvz" ]];}判断
+#检查VPS虚拟状态，{	if [ -n "${virt}" -a "${virt}" = "kvm" ]; then;}判断
 VPS_Virt(){
-	Update_SYS_Y
-	if [[ ${release} == "centos" ]]; then
-		virt=`virt-what`
-		virt=`virt-what`
-		if [[ -z ${virt} ]]; then
-			yum install virt-what -y
+	#判断是否安装，判断输出是否为空
+	if  [[ "$(command -v virt-what)" == "" ]]; then
+		echo " 开始安装 virt-what..."
+		Update_SYS_Yuan
+		if [[ ${release} == "centos" ]]; then
 			virt=`virt-what`
-		fi
+			if [[ -z ${virt} ]]; then
+				yum install virt-what -y
+				virt=`virt-what`
+			fi
+		else
+			virt=`virt-what`
+			if [[ -z ${virt} ]]; then
+				apt-get install virt-what -y
+				virt=`virt-what`
+			fi
+		fi			
 	else
 		virt=`virt-what`
 		if [[ -z ${virt} ]]; then
-			apt-get install virt-what -y
-			virt=`virt-what`
+			echo -e "${Error} 系统架构检查失败 !" && exit 1
 		fi
 	fi
 }
@@ -134,7 +187,7 @@ Install_SSHPor(){
 	echo "确定更改SSH端口吗 ？[y/N]" && echo
 	stty erase '^H' && read -p "(默认: y):" unyn 
 	if [[ ${unyn} == [Nn] ]]; then
-		echo && echo -e "${Info} 已取消..." && exit 1
+		echo -e "${Info} 已取消..." && exit 1
 	else
 		if [[ -e ${SSH_file} ]]; then
 				rm -rf "${SSH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
@@ -154,32 +207,60 @@ Install_SSHPor(){
 }
 
 #安装BBR时进行系统判断
-Configure_BBR(){	
+Configure_BBR(){
+	VPS_Virt
+	if [ -n "${virt}" -a "${virt}" = "lxc" ]; then
+		echo -e "${Error} BBR 不支持 LXC 虚拟化(不支持更换内核) !" && exit 1
+	fi
+	if [ -n "${virt}" -a "${virt}" = "openvz" ] || [ -d "/proc/vz" ]; then
+		echo -e "${Error} BBR 不支持 OpenVZ 虚拟化(不支持更换内核) !" && exit 1
+	fi
+	BBR_OS_VER
+	clear
 	if [[ ${release} == "centos" ]]; then
-		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
+		echo -e "请问您的系统是否为${Red_font_prefix} $OS_input ${Font_color_suffix}，正确请继续 [y/N]" && echo
+		stty erase '^H' && read -p "(默认: N):" unyn 
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
-		else
+		elif [[ ${unyn} == [Yy] ]]; then
 			clear
 			CENTOS_BBR
+		else
+			echo -e "${Info} 请正确输入 " && exit 1
 		fi	
 	else
-		read -e -p "请问您的系统是否为 ${release}，正确请继续 [y/N]（默认取消）：" unyn
+		echo -e "请问您的系统是否为${Red_font_prefix} $OS_input ${Font_color_suffix}，正确请继续 [y/N]" && echo
+		stty erase '^H' && read -p "(默认: N):" unyn 
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
-		else
+		elif [[ ${unyn} == [Yy] ]]; then
 			clear
 			DEBIAN_BBR
+		else
+			echo -e "${Info} 请正确输入 " && exit 1				
 		fi
+	fi
+}
+
+#KVM开启BBR系统版本判断
+BBR_OS_VER(){
+	if [[ ${release} == "ubuntu" ]]; then
+		[ -n "$(Os_Ver)" -a "$(Os_Ver)" -lt 16 ] && echo -e "${Error}您的系统版本低于 Ubuntu 16 ，无法开启BBR ，请升级系统至最低版本" && exit 1
+	elif [[ ${release} == "debian" ]]; then 
+		[ -n "$(Os_Ver)" -a "$(Os_Ver)" -lt 8 ] && echo -e "${Error}您的系统版本低于 Debian 8 ，无法开启BBR ，请升级系统至最低版本" && exit 1	
+	elif [[ ${release} == "centos" ]]; then
+		[ -n "$(Os_Ver)" -a "$(Os_Ver)" -lt 6 ] && echo -e "${Error}您的系统版本低于 Centos 6，无法开启BBR ，请升级系统至最低版本" && exit 1
+	else
+		echo -e "${Error}您的系统无法判断是否可以开启 BBR ，请访问 https://teddysun.com/489.html 查看" && exit 1
 	fi
 }
 
 #CentOS安装BBR
 CENTOS_BBR(){
 echo -e "  
-您的系统为${Green_font_prefix} ${release} ${Font_color_suffix}，您当前的内核版本为:${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
+您的系统为${Red_font_prefix} $OS_input ${Font_color_suffix}，您当前的内核版本为：${Red_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
 	
  ${Green_font_prefix}1.${Font_color_suffix} 安装最新版内核并开启 BBR
 ————————
@@ -203,7 +284,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 # Debian/Ubuntu安装BBR
 DEBIAN_BBR(){
 echo -e "  
-您的系统为${Green_font_prefix} ${release} ${Font_color_suffix}，您当前的内核版本为:${Green_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
+您的系统为${Red_font_prefix} $OS_input ${Font_color_suffix}，您当前的内核版本为：${Red_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
 	
  ${Green_font_prefix}1.${Font_color_suffix} 直接开启 BBR
  ${Green_font_prefix}2.${Font_color_suffix} 安装最新版内核并开启 BBR
@@ -246,7 +327,10 @@ Status_BBR(){
 #CentOS系统和其他系统直接自动升级到最新内核后自动开启
 Auto_BBR(){
 	VPS_Virt
-	if [[ ${virt} == "openvz" ]]; then
+	if [ -n "${virt}" -a "${virt}" = "lxc" ]; then
+		echo -e "${Error} BBR 不支持 LXC 虚拟化(不支持更换内核) !" && exit 1
+	fi
+	if [ -n "${virt}" -a "${virt}" = "openvz" ] || [ -d "/proc/vz" ]; then
 		echo -e "${Error} BBR 不支持 OpenVZ 虚拟化(不支持更换内核) !" && exit 1
 	fi
 	BBR_installation_status
@@ -260,16 +344,50 @@ BBR_installation_status(){
 		echo -e "${Error} 没有发现 BBR脚本，开始下载..."
 	fi
 	cd "${file}"
-	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/bbr.sh; then
+	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/bbr_CH.sh; then
 		echo -e "${Error} BBR 脚本下载失败 !" && exit 1
 	else
 		echo -e "${Info} BBR 脚本下载完成 !"
-		chmod +x bbr.sh
+		chmod +x bbr_CH.sh
 	fi
 }
 
-#OpenVZ BBR
+#安装OpenVZ BBR时系统判断
 Configure_BBR_OV(){
+	VPS_Virt
+	if [ -n "${virt}" -a "${virt}" = "kvm" ]; then
+		echo -e "${Error} OpenVZ BBR 不支持 KVM 虚拟化!" && exit 1
+	fi	
+	clear
+	if [[ ${release} == "centos" ]]; then
+		echo -e "请问您的系统是否为${Red_font_prefix} $OS_input ${Font_color_suffix}，正确请继续 [y/N]" && echo
+		stty erase '^H' && read -p "(默认: N):" unyn 
+		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
+		if [[ ${unyn} == [Nn] ]]; then
+			echo && echo -e "${Info} 已取消..." && exit 1
+		elif [[ ${unyn} == [Yy] ]]; then
+			clear
+			Install_OpenVZ_BBR
+		else
+			echo -e "${Info} 请正确输入 " && exit 1
+		fi	
+	else
+		echo -e "请问您的系统是否为${Red_font_prefix} $OS_input ${Font_color_suffix}，正确请继续 [y/N]" && echo
+		stty erase '^H' && read -p "(默认: N):" unyn 
+		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
+		if [[ ${unyn} == [Nn] ]]; then
+			echo && echo -e "${Info} 已取消..." && exit 1
+		elif [[ ${unyn} == [Yy] ]]; then
+			clear
+			Install_OpenVZ_BBR
+		else
+			echo -e "${Info} 请正确输入 " && exit 1		
+		fi
+	fi
+}
+
+#安装OpenVZ BBR
+Install_OpenVZ_BBR(){
 	echo -e "${Info} "
 	cat /dev/net/tun
 	echo -e "————————"
@@ -314,7 +432,7 @@ Configure_BBR_OV(){
 #OpenVZ BBR lkl-Haproxy
 Lkl-Haproxy(){
 	VPS_Virt
-	if [[ ${virt} == "kvm" ]]; then
+	if [ -n "${virt}" -a "${virt}" = "kvm" ]; then
 		echo -e "${Error} OpenVZ BBR 不支持 KVM 虚拟化!" && exit 1
 	fi
 	if [[ ${release} == "centos" ]]; then
@@ -346,7 +464,7 @@ Lkl-Haproxy(){
 #OpenVZ BBR lkl-Rinetd
 Lkl-Rinetd(){
 	VPS_Virt
-	if [[ ${virt} == "kvm" ]]; then
+	if [ -n "${virt}" -a "${virt}" = "kvm" ]; then
 		echo -e "${Error} OpenVZ BBR 不支持 KVM 虚拟化!" && exit 1
 	fi
 	if [[ ${release} == "centos" ]]; then
@@ -379,25 +497,55 @@ Lkl-Rinetd(){
 
 #更新系统时间
 SYS_Time(){
-	echo -e "${Info} 开始同步系统时间...."
-	if [[ ${release} == "centos" ]]; then
-		yum -y install ntp ntpdate
-		tzselect
-		ntpdate cn.pool.ntp.org
+	echo -e "${Info} 开始配置时区...."
+	if [ -f /etc/localtime ]; then
+		if cat /etc/localtime | grep -Eqi "CST-8"; then
+			echo -e "${Info} 已是上海时区...."
+		else
+			\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+			echo -e "${Info} 时区错误，已修改为上海时区...."
+		fi
 	else
-		dpkg-reconfigure tzdata
-		apt-get install ntpdate -y
-		ntpdate cn.pool.ntp.org
+		\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+		echo -e "${Info} 时区文件不存在，已配置为上海时区...."
 	fi
+	echo -e "${Info} 复核时区 "
+	if  [[ "$(command -v ntpdate)" == "" ]]; then
+		echo -e "${Info} 开始安装 ntpdate ...."
+		if [[ ${release} == "centos" ]]; then
+			yum -y install ntp ntpdate
+		elif [[ ${release} == "debian" ]]; then	
+			apt-get install ntpdate -y
+		elif [[ ${release} == "ubuntu" ]]; then	
+			apt-get install ntpdate -y	
+		else
+		 	echo -e "${Error} 无法判断您的系统 " && exit 1	
+		fi
+	else
+		if [[ ${release} == "centos" ]]; then
+			tzselect
+		elif [[ ${release} == "debian" ]]; then	
+			dpkg-reconfigure tzdata
+		elif [[ ${release} == "ubuntu" ]]; then	
+			dpkg-reconfigure tzdata	
+		else
+		 	echo -e "${Error} 无法判断您的系统 " && exit 1	
+		fi	
+	fi
+	echo -e "${Info} 开始同步系统时间...."
+	ntpdate cn.pool.ntp.org
 	echo -e "${Info} 系统时间修改完毕，请使用 date 命令查看！"
 }
+
 #更新系统及软件
 Update_SYS(){
 	echo -e "${Info} 升级前请做好备份，如有内核升级请慎重考虑 ！"
 	echo "确定要升级系统软件吗 ？[y/N]" && echo
 	stty erase '^H' && read -p "(默认: n):" unyn
-	[[ -z ${unyn} ]] && echo && echo "已取消..." && exit 1
-	if [[ ${unyn} == [Yy] ]]; then		
+	[[ -z ${unyn} ]] && echo "已取消..." && exit 1
+	if [[ ${unyn} == [Nn] ]]; then
+		echo && echo -e "${Info} 已取消..." && exit 1
+	elif [[ ${unyn} == [Yy] ]]; then		
 		if [[ ${release} == "centos" ]]; then
 			echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
 			yum clean all
@@ -405,7 +553,7 @@ Update_SYS(){
 			yum update
 		else
 			echo -e "${Info} 开始更新软件源...."
-			Update_SYS_Y
+			Update_SYS_Yuan
 			echo -e "${Info} 软件源更新完毕！"
 			echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
 			echo -e "${Info} 若更新含有内核、GRUB更新，请务必在后面执行 dist-upgrade，否则可能存在无法启动 ！"
@@ -413,17 +561,19 @@ Update_SYS(){
 			echo -e "${Info} 若存在内核、GRUB更新，请同意执行 dist-upgrade 命令！"
 			echo "确定要执行 dist-upgrade 命令吗 ？[y/N]" && echo
 			stty erase '^H' && read -p "(默认: n):" unyn
-			[[ -z ${unyn} ]] && echo && echo "已取消..." 
-				if [[ ${unyn} == [Yy] ]]; then	
-					apt-get dist-upgrade
-				fi
+			[[ -z ${unyn} ]] && echo "已取消..." 
+			if [[ ${unyn} == [Yy] ]]; then	
+				apt-get dist-upgrade
+			fi
 		fi		
 		echo -e "${Info} 更新软件及系统完毕，请稍后自行重启 ！"
+	else
+		echo -e "${Info} 请正确输入 " && exit 1
 	fi
 }
 
 #更新软件源
-Update_SYS_Y(){		
+Update_SYS_Yuan(){		
 	if [[ ${release} == "centos" ]]; then
 		echo -e "${Info} 清空源缓存... "
 		yum clean all
@@ -451,26 +601,27 @@ BT_Panel_5.9(){
 		stty erase '^H' && read -p "(默认: y):" unyn 
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
-			else
-			wget -O install.sh http://download.bt.cn/install/install.sh && sh install.sh
+		else
+			wget -O install.sh http://download.bt.cn/install/install.sh && sh install.sh	
 		fi
 	elif [[ ${release} == "debian" ]]; then
 		echo "请确定您是 Debian 系统吗？[y/N]" && echo
 		stty erase '^H' && read -p "(默认: y):" unyn 
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
-			else
-			wget -O install.sh http://download.bt.cn/install/install-ubuntu.sh && bash install.sh
+		else
+			wget -O install.sh http://download.bt.cn/install/install-ubuntu.sh && bash install.sh			
 		fi
 	elif [[ ${release} == "ubuntu" ]]; then
 		echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
-		stty erase '^H' && read -p "(默认: y):" unyn 
+		stty erase '^H' && read -p "(默认: y):" unyn 		
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
-			else
-			wget -O install.sh http://download.bt.cn/install/install-ubuntu.sh && sudo bash install.sh
+		else
+			wget -O install.sh http://download.bt.cn/install/install-ubuntu.sh && sudo bash install.sh	
 		fi
-	echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
+	else
+		echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
 	fi
 }
 
@@ -487,34 +638,35 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 	 "
 	stty erase '^H' && read -p "(默认: y):" unyn 
 	if [[ ${unyn} == [Nn] ]]; then
-	echo && echo -e "${Info} 已取消..." && exit 1
+		echo -e "${Info} 已取消..." && exit 1
 	else
 		echo -e "${Info} 开始安装..."
 		if [[ ${release} == "centos" ]]; then
 			echo "请确定您是 CentOS 系统吗?[y/N]" && echo
 			stty erase '^H' && read -p "(默认: y):" unyn 
 			if [[ ${unyn} == [Nn] ]]; then
-				echo && echo -e "${Info} 已取消..." && exit 1
-				else
+				echo -e "${Info} 已取消..." && exit 1
+			else
 				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && bash install_panel.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
 			stty erase '^H' && read -p "(默认: y):" unyn 
 			if [[ ${unyn} == [Nn] ]]; then
-				echo && echo -e "${Info} 已取消..." && exit 1
-				else
+				echo -e "${Info} 已取消..." && exit 1
+			else
 				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && bash install_panel.sh
 			fi
 		elif [[ ${release} == "ubuntu" ]]; then
 			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
 			stty erase '^H' && read -p "(默认: y):" unyn 
 			if [[ ${unyn} == [Nn] ]]; then
-				echo && echo -e "${Info} 已取消..." && exit 1
-				else
+				echo -e "${Info} 已取消..." && exit 1
+			else
 				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && sudo bash install_panel.sh
 			fi
-		echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
+		else
+			echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
 		fi		
 	fi	
 }
@@ -532,7 +684,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 	 "
 	stty erase '^H' && read -p "(默认: y):" unyn 
 	if [[ ${unyn} == [Nn] ]]; then
-	echo && echo -e "${Info} 已取消..." && exit 1
+		echo -e "${Info} 已取消..." && exit 1
 	else
 		echo -e "${Info} 开始安装..."
 		if [[ ${release} == "centos" ]]; then
@@ -540,26 +692,27 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			stty erase '^H' && read -p "(默认: y):" unyn 
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
-				else
+			else
 				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && bash update_panel.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
 			stty erase '^H' && read -p "(默认: y):" unyn 
 			if [[ ${unyn} == [Nn] ]]; then
-				echo && echo -e "${Info} 已取消..." && exit 1
-				else
+				echo -e "${Info} 已取消..." && exit 1
+			else
 				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && bash update_panel.sh
 			fi
 		elif [[ ${release} == "ubuntu" ]]; then
 			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
 			stty erase '^H' && read -p "(默认: y):" unyn 
 			if [[ ${unyn} == [Nn] ]]; then
-				echo && echo -e "${Info} 已取消..." && exit 1
-				else
+				echo -e "${Info} 已取消..." && exit 1
+			else
 				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && sudo bash update_panel.sh
 			fi
-		echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
+		else
+			echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
 		fi		
 	fi	
 }
@@ -567,11 +720,11 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 #修改当前用户密码
 PASSWORD(){
 echo -e "
- ${Info} 请在下方输入新的密码，密码不会显示，输入完毕后回车确认！
- 如不想修改，请使用 Ctrl+C 取消！ 
+ ${Info} 请在下方输入新的密码，密码不会显示，需输入两遍，输入完毕后回车确认！
+ 如不想修改，请使用 Ctrl+C 取消！或第一次直接回车，第二次随便输入后再回车，两次密码不一样也会取消修改。
 ———————— 
  "
-passwd
+	passwd
 }
 
 #Bench测试
@@ -589,6 +742,13 @@ Install_BH(){
 		chmod +x bench.sh
 	fi
 	bash "${BH_file}"
+	#测试完毕后删除脚本
+	rm -rf "${BH_file}"
+	if [[ -e ${BH_file} ]]; then
+		echo -e "${Error} 删除脚本失败，请手动删除 ${BH_file}"
+	else	
+		echo -e "${Info} 已删除脚本"
+	fi
 }
 
 
@@ -618,9 +778,9 @@ echo -e "${Green_font_prefix} [请选择 Yabs 需要的测试项] ${Font_color_s
  8. 基本信息+磁盘性能
  9. 基本信息+国际网速
 
-
- 注：x86主机默认使用Geekbench 4 跑分
-    若需Geekbench 6 跑分，内存最好不小于 2 GB
+ 注： 
+ x86主机默认使用Geekbench 4 跑分
+ 若需Geekbench 6 跑分，内存最好不小于 2 GB
 	 "
 	read -e -p "(默认: 1. 基本信息+磁盘性能+国际网速+Geekbench 5 跑分):" yabs_num
 	[[ -z "${yabs_num}" ]] && yabs_num="1"
@@ -664,6 +824,19 @@ echo -e "${Green_font_prefix} [请选择 Yabs 需要的测试项] ${Font_color_s
 	else
 		echo -e "${Error} 请输入正确的数字 [1-9]" && exit 1
 	fi
+	#测试完毕后删除脚本
+	rm -rf "${YB_file}"
+	rm -rf "${file}/geekbench_claim.url"
+	if [[ -e ${YB_file} ]]; then
+		echo -e "${Error} 删除脚本失败，请手动删除 ${YB_file}"
+	else	
+		echo -e "${Info} 已删除脚本"
+	fi
+	if [[ -e ${file}/geekbench_claim.url ]]; then
+		echo -e "${Error} 删除跑分文件失败，请手动删除 ${file}/geekbench_claim.url"
+	else	
+		echo -e "${Info} 已删除跑分文件"
+	fi	
 }
 
 #SuperBench 测试
@@ -715,40 +888,56 @@ echo -e "${Green_font_prefix} [请选择 SuperBench 修改版需要的测试项]
 	else
 		echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
 	fi
+	#测试完毕后删除脚本
+	rm -rf "${file}/superbench.log"
+	rm -rf "${SB_file}"
+	if [[ -e ${SB_file} ]]; then
+		echo -e "${Error} 删除脚本失败，请手动删除 ${SB_file}"
+	else	
+		echo -e "${Info} 已删除脚本"
+	fi
+	if [[ -e ${file}/superbench.log ]]; then
+		echo -e "${Error} 删除跑分文件失败，请手动删除 ${file}/superbench.log"
+	else	
+		echo -e "${Info} 已删除跑分文件"
+	fi		
 }
 
 #流媒体解锁检测
 Install_LMT(){
-	if [[ -e ${LMT_file} ]]; then
-		rm -rf "${LMT_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	else	
-		echo -e "${Error} 没有发现流媒体测试脚本，开始下载..."
-	fi
-	cd "${file}"
-	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh; then
-		echo -e "${Error} 流媒体测试脚本下载失败 !" && exit 1
-	else
-		echo -e "${Info} 流媒体测试脚本下载完成 !"
-		chmod +x check.sh
-	fi
-	bash "${LMT_file}"
+	bash <(curl -sSL https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh)
 }
 
-#三网回程快速测试（参考）
+#三网回程测试（含路由）
 Install_SpeedNet(){
-	if [[ -e ${SpeedNet_file} ]]; then
-		rm -rf "${SpeedNet_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	else	
-		echo -e "${Error} 没有发现三网回程快速测试脚本，开始下载..."
-	fi
-	cd "${file}"
-	if ! wget -N --no-check-certificate http://tutu.ovh/bash/returnroute/test.sh; then
-		echo -e "${Error} 三网回程快速测试脚本下载失败 !" && exit 1
+	clear
+echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
+ 1. 三网回程线路快速测试 结果仅供参考（默认）
+ 2. SpeedTest.net三网回程网速测速（单线程/8线程）
+ 3. 三网回程路由测试（BestTrace库）
+ 4. 指定 IP 回程路由测试（BestTrace库）
+	 "
+	read -e -p "(默认: 1. 三网回程快速测试 结果仅供参考):" SpeedNet_num
+	[[ -z "${SpeedNet_num}" ]] && SpeedNet_num="1"
+	clear
+	if [[ ${SpeedNet_num} == "1" ]]; then
+		echo -e "${Info} 您选择的是： 三网回程线路快速测试 结果仅供参考，已开始测试 !
+		"		
+		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/SpeedNet_BK.sh)
+	elif [[ ${SpeedNet_num} == "2" ]]; then
+		echo -e "${Info} 您选择的是：SpeedTest.net三网回程网速测速（单线程/8线程），已开始测试 !
+		"		
+		bash <(curl -sSL https://raw.githubusercontent.com/veoco/bim-core/main/hyperspeed.sh)
+	elif [[ ${SpeedNet_num} == "3" ]]; then
+		echo -e "${Info} 您选择的是：三网回程路由测试（BestTrace库），已开始测试 !
+		"		
+		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoBestTrace.sh)
+	elif [[ ${SpeedNet_num} == "4" ]]; then
+		echo -e "${Info} 您选择的是：指定 IP 回程路由测试（BestTrace库），已开始测试 !"		
+		bash <(curl -sSL https://raw.githubusercontent.com/spiritLHLS/ecs/main/return.sh)
 	else
-		echo -e "${Info} 三网回程快速测试脚本下载完成 !"
-		chmod +x test.sh
+		echo -e "${Error} 请输入正确的数字 [1-4]" && exit 1
 	fi
-	bash "${SpeedNet_file}"
 }
 
 #UnixBench测试
@@ -768,13 +957,13 @@ Install_UB(){
 	echo "确定开始 UnixBench 测试吗 ？[y/N]" && echo
 	stty erase '^H' && read -p "(默认: y):" unyn 
 	if [[ ${unyn} == [Nn] ]]; then
-		echo && echo -e "${Info} 已取消..." && exit 1
+		echo -e "${Info} 已取消..." && exit 1
+	else
+		if [[ ${release} == "centos" ]]; then
+			yum install libc6-dev -y
 		else
-			if [[ ${release} == "centos" ]]; then
-				yum install libc6-dev -y
-			else
-				apt-get install libc6-dev -y
-			fi		
+			apt-get install libc6-dev -y
+		fi		
 		bash "${UB_file}"
 	fi
 }
@@ -784,11 +973,13 @@ Install_UB(){
 
 #显示菜单
 check_sys
+input_BL
+clear
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
   -- Toyo | ChennHaoo --
   
- ${Green_font_prefix} 1.${Font_color_suffix} 安装常用依赖
+ ${Green_font_prefix} 1.${Font_color_suffix} 安装常用依赖（含更新源）
  ${Green_font_prefix} 2.${Font_color_suffix} 更新软件源
  ${Green_font_prefix} 3.${Font_color_suffix} 更新系统及软件（慎重）
  ${Green_font_prefix} 4.${Font_color_suffix} 修改系统时间
@@ -805,10 +996,10 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试（跑分）
  ${Green_font_prefix} 14.${Font_color_suffix} SuperBench 修改版测试（含ChatGPT检测）
  ${Green_font_prefix} 15.${Font_color_suffix} 流媒体解锁检测（全面）
- ${Green_font_prefix} 16.${Font_color_suffix} 三网回程快速测试（参考）
+ ${Green_font_prefix} 16.${Font_color_suffix} 三网回程测试（含路由）
  ${Green_font_prefix} 17.${Font_color_suffix} UnixBench_V4 测试（时间较长）
 
-
+ ${Info} 您当前的系统为：${Red_font_prefix}$OS_input${Font_color_suffix}，内核为：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
  ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
 read -e -p " 请输入数字 [1-17]:" num
@@ -817,7 +1008,7 @@ case "$num" in
 	SYS_Tools
 	;;
 	2)
-	Update_SYS_Y
+	Update_SYS_Yuan
 	;;
 	3)
 	Update_SYS
