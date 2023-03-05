@@ -5,11 +5,13 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程快速测试
-#	Version: 2023.03.05_02
+#	Version: 2023.03.06_01
 #	Author: ChennHaoo
 #   参考：主机资讯 | www.zhujizixun.com  http://tutu.ovh/bash/returnroute/test.sh
 #	Blog: https://github.com/Chennhaoo
 #=================================================
+
+file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 
 echo -e "\n本工具来自 主机资讯 | www.zhujizixun.com\n"
 echo -e "\n该小工具可以为你检查本服务器到中国北京、上海、广州的 [回程网络] 类型\n"
@@ -17,9 +19,16 @@ read -p "按Enter(回车)开始启动检查..." sdad
 
 iplise=(219.141.136.10 202.106.196.115 211.136.28.231 202.96.199.132 211.95.72.1 211.136.112.50 61.144.56.100 211.95.193.97 120.196.122.69)
 iplocal=(北京电信 北京联通 北京移动 上海电信 上海联通 上海移动 广州电信 广州联通 广州移动)
-echo "开始安装mtr命令..."
-apt install mtr -y
-yum -y install mtr
+
+if  [[ "$(command -v mtr)" == "" ]]; then
+	echo "开始安装mtr命令..."
+	if [[ ! -z "$(type -p yum)" ]]; then
+		yum -y install mtr
+	else
+		apt install mtr -y
+	fi
+fi
+
 clear
 echo -e "\n正在进行TCP回程路由测试,请稍等..."
 echo -e "——————————————————————————————\n"
@@ -91,5 +100,5 @@ for i in {0..8}; do
 	fi
 echo 
 done
-rm -f /root/traceroute_testlog
+rm -rf "${file}/traceroute_testlog"
 echo -e "\n本脚本测试结果  仅供参考\n"
