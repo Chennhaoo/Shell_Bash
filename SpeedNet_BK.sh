@@ -21,12 +21,14 @@ iplise=(219.141.136.10 202.106.196.115 211.136.28.231 202.96.199.132 211.95.72.1
 iplocal=(北京电信 北京联通 北京移动 上海电信 上海联通 上海移动 广州电信 广州联通 广州移动)
 
 if  [[ "$(command -v mtr)" == "" ]]; then
-	echo "开始安装mtr命令..."
+	echo "开始安装 mtr 命令..."
 	if [[ ! -z "$(type -p yum)" ]]; then
 		yum -y install mtr
 	else
 		apt install mtr -y
 	fi
+else
+	echo "mtr 已安装"
 fi
 
 clear
