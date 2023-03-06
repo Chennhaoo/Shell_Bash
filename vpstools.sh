@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.06_03
+#	Version: 2023.03.06_04
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.06_03"
+sh_ver="2023.03.06_04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -549,8 +549,7 @@ Update_SYS(){
 	elif [[ ${unyn} == [Yy] ]]; then		
 		if [[ ${release} == "centos" ]]; then
 			echo -e "${Info} 开始更新软件，请手动确认是否升级 ！"
-			yum clean all
-			yum makecache
+			Update_SYS_Yuan
 			yum update
 		else
 			echo -e "${Info} 开始更新软件源...."
@@ -580,13 +579,19 @@ Update_SYS_Yuan(){
 		yum clean all
 		echo -e "${Info} 更新源缓存... "
 		yum makecache
-	elif cat /etc/issue | grep -q -E "Debian GNU/Linux 10"; then
-		echo -e "${Info} 您使用的是Debian 10系统，开始更新软件源...."
-		apt-get --allow-releaseinfo-change update
+	elif [[ ${release} == "ubuntu" ]]; then
 		apt-get update
+	elif [[ ${release} == "debian" ]]; then 
+		if cat /etc/issue | grep -q -E "Debian GNU/Linux 10"; then
+			echo -e "${Info} 您使用的是 Debian 10 系统，开始更新软件源...."
+			apt-get --allow-releaseinfo-change update
+			apt-get update
 		else
-		echo -e "${Info} 您使用的是非Debian 10系统，开始更新软件源...."
-		apt-get update
+			echo -e "${Info} 您使用的是非 Debian 10 系统的 Debian，开始更新软件源...."
+			apt-get update	
+		fi					
+	else
+		echo -e "${Error} 您的系统无法探测到" && exit 1
 	fi		
 	echo -e "${Info} 软件源更新完毕..."
 }
