@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.06_04
+#	Version: 2023.03.07_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.06_04"
+sh_ver="2023.03.07_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -789,7 +789,7 @@ echo -e "${Green_font_prefix} [请选择 Yabs 需要的测试项] ${Font_color_s
  x86主机默认使用Geekbench 4 跑分
  若需Geekbench 6 跑分，内存最好不小于 2 GB
 	 "
-	read -e -p "(默认: 1. 基本信息+磁盘性能+国际网速+Geekbench 5 跑分):" yabs_num
+	read -e -p " 请输入数字 [1-10] ( 默认：1 ）：" yabs_num
 	[[ -z "${yabs_num}" ]] && yabs_num="1"
 	clear
 	if [[ ${yabs_num} == "1" ]]; then
@@ -873,7 +873,7 @@ echo -e "${Green_font_prefix} [请选择 SuperBench 修改版需要的测试项]
 
  注：若需Geekbench 6 跑分，内存最好不小于 2 GB
 	 "
-	read -e -p "(默认: 1. 基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内网速):" SuperBench_num
+	read -e -p " 请输入数字 [1-6] ( 默认：1 ）：" SuperBench_num
 	[[ -z "${SuperBench_num}" ]] && SuperBench_num="1"
 	clear
 	if [[ ${SuperBench_num} == "1" ]]; then
@@ -930,7 +930,7 @@ echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
  4. 指定 IP 回程路由测试（BestTrace库）
  5. 取消测试
 	 "
-	read -e -p "(默认: 1. 三网回程快速测试 结果仅供参考):" SpeedNet_num
+	read -e -p " 请输入数字 [1-5] ( 默认：1 ）：" SpeedNet_num
 	[[ -z "${SpeedNet_num}" ]] && SpeedNet_num="1"
 	clear
 	if [[ ${SpeedNet_num} == "1" ]]; then
