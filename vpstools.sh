@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.07_01
+#	Version: 2023.03.09_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.07_01"
+sh_ver="2023.03.09_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -926,8 +926,8 @@ Install_SpeedNet(){
 echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
  1. 三网回程线路快速测试 结果仅供参考（默认）
  2. SpeedTest.net三网回程网速测速（单线程/8线程）
- 3. 三网回程路由测试（BestTrace库）
- 4. 指定 IP 回程路由测试（BestTrace库）
+ 3. 本机三网回程路由测试（IPv4、IPv6）
+ 4. 本机到指定 IP 回程路由测试（IPv4、IPv6）
  5. 取消测试
 	 "
 	read -e -p " 请输入数字 [1-5] ( 默认：1 ）：" SpeedNet_num
@@ -942,11 +942,11 @@ echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
 		"		
 		bash <(curl -sSL https://raw.githubusercontent.com/veoco/bim-core/main/hyperspeed.sh)
 	elif [[ ${SpeedNet_num} == "3" ]]; then
-		echo -e "${Info} 您选择的是：三网回程路由测试（BestTrace库），已开始测试 !
+		echo -e "${Info} 您选择的是：本机三网回程路由测试（IPv4、IPv6），已开始测试 !
 		"		
-		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoBestTrace.sh)
+		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh)
 	elif [[ ${SpeedNet_num} == "4" ]]; then
-		echo -e "${Info} 您选择的是：指定 IP 回程路由测试（BestTrace库），已开始测试 !"		
+		echo -e "${Info} 您选择的是：本机到指定 IP 回程路由测试（IPv4、IPv6），已开始测试 !"		
 		bash <(curl -sSL https://raw.githubusercontent.com/spiritLHLS/ecs/main/return.sh)
 	elif [[ ${SpeedNet_num} == "5" ]]; then
 		echo -e "${Info} 已取消测试 ！" && exit 1	
