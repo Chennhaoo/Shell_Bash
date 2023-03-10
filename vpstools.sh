@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.09_01
+#	Version: 2023.03.10_02
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.09_01"
+sh_ver="2023.03.10_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -773,17 +773,18 @@ Install_YB(){
 		chmod +x yabs.sh
 	fi
 	clear
-echo -e "${Green_font_prefix} [请选择 Yabs 需要的测试项] ${Font_color_suffix}
- 1. 基本信息+磁盘性能+国际网速+Geekbench 5 跑分（默认）
- 2. 基本信息+磁盘性能+国际网速+Geekbench 6 跑分
- 3. 基本信息+磁盘性能+Geekbench 5 跑分
- 4. 基本信息+磁盘性能+Geekbench 6 跑分
- 5. 基本信息+Geekbench 6 跑分
- 6. 基本信息+Geekbench 5 跑分
- 7. 基本信息+Geekbench 4 跑分
- 8. 基本信息+磁盘性能
- 9. 基本信息+国际网速
- 10. 取消测试
+echo -e " 请选择 Yabs 需要的测试项 
+————————————————————————————————————
+${Green_font_prefix} 1. ${Font_color_suffix}基本信息+磁盘性能+国际网速+Geekbench 5 跑分（默认）
+${Green_font_prefix} 2. ${Font_color_suffix}基本信息+磁盘性能+国际网速+Geekbench 6 跑分
+${Green_font_prefix} 3. ${Font_color_suffix}基本信息+磁盘性能+Geekbench 5 跑分
+${Green_font_prefix} 4. ${Font_color_suffix}基本信息+磁盘性能+Geekbench 6 跑分
+${Green_font_prefix} 5. ${Font_color_suffix}基本信息+Geekbench 6 跑分
+${Green_font_prefix} 6. ${Font_color_suffix}基本信息+Geekbench 5 跑分
+${Green_font_prefix} 7. ${Font_color_suffix}基本信息+Geekbench 4 跑分
+${Green_font_prefix} 8. ${Font_color_suffix}基本信息+磁盘性能
+${Green_font_prefix} 9. ${Font_color_suffix}基本信息+国际网速
+${Green_font_prefix} 10. ${Font_color_suffix}取消测试
 
  注： 
  x86主机默认使用Geekbench 4 跑分
@@ -863,13 +864,14 @@ SuperBench(){
 		chmod +x "${SB_file}"
 	fi
 	clear
-echo -e "${Green_font_prefix} [请选择 SuperBench 修改版需要的测试项] ${Font_color_suffix}
- 1. 基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内网速（默认）
- 2. 基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内国际网速+国际回程+Geekbench 6 跑分
- 3. 基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内国际网速+国际回程
- 4. 仅国内网速
- 5. 仅基本流媒体解锁（含ChatGPT）
- 6. 取消测试
+echo -e " 请选择 SuperBench 修改版需要的测试项
+————————————————————————————————————
+${Green_font_prefix} 1. ${Font_color_suffix}基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内网速（默认）
+${Green_font_prefix} 2. ${Font_color_suffix}基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内国际网速+国际回程+Geekbench 6 跑分
+${Green_font_prefix} 3. ${Font_color_suffix}基本信息+基本流媒体解锁（含ChatGPT）+存储性能+国内国际网速+国际回程
+${Green_font_prefix} 4. ${Font_color_suffix}仅国内网速
+${Green_font_prefix} 5. ${Font_color_suffix}仅基本流媒体解锁（含ChatGPT）
+${Green_font_prefix} 6. ${Font_color_suffix}取消测试
 
  注：若需Geekbench 6 跑分，内存最好不小于 2 GB
 	 "
@@ -923,12 +925,13 @@ Install_LMT(){
 #三网回程测试（含路由）
 Install_SpeedNet(){
 	clear
-echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
- 1. 三网回程线路快速测试 结果仅供参考（默认）
- 2. SpeedTest.net三网回程网速测速（单线程/8线程）
- 3. 本机三网回程路由测试（IPv4、IPv6）
- 4. 本机到指定 IP 回程路由测试（IPv4、IPv6）
- 5. 取消测试
+echo -e " 请选择需要的测试项
+————————————————————————————————————
+${Green_font_prefix} 1. ${Font_color_suffix}三网回程线路快速测试 结果仅供参考（默认）
+${Green_font_prefix} 2. ${Font_color_suffix}SpeedTest.net 三网回程网速测速（单线程/8线程）
+${Green_font_prefix} 3. ${Font_color_suffix}本机 IPv4/IPv6 三网回程路由测试
+${Green_font_prefix} 4. ${Font_color_suffix}本机到指定 IPv4/IPv6 路由测试
+${Green_font_prefix} 5. ${Font_color_suffix}取消测试
 	 "
 	read -e -p " 请输入数字 [1-5] ( 默认：1 ）：" SpeedNet_num
 	[[ -z "${SpeedNet_num}" ]] && SpeedNet_num="1"
@@ -942,12 +945,12 @@ echo -e "${Green_font_prefix} [请选择需要的测试项] ${Font_color_suffix}
 		"		
 		bash <(curl -sSL https://raw.githubusercontent.com/veoco/bim-core/main/hyperspeed.sh)
 	elif [[ ${SpeedNet_num} == "3" ]]; then
-		echo -e "${Info} 您选择的是：本机三网回程路由测试（IPv4、IPv6），已开始测试 !
+		echo -e "${Info} 您选择的是：本机 IPv4/IPv6 三网回程路由测试，已开始测试 !
 		"		
 		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh)
 	elif [[ ${SpeedNet_num} == "4" ]]; then
-		echo -e "${Info} 您选择的是：本机到指定 IP 回程路由测试（IPv4、IPv6），已开始测试 !"		
-		bash <(curl -sSL https://raw.githubusercontent.com/spiritLHLS/ecs/main/return.sh)
+		echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由测试，已开始测试 !"		
+		bash <(curl -sSL https://raw.githubusercontent.com/spiritLHLS/ecs/main/return.sh) Specify_IP
 	elif [[ ${SpeedNet_num} == "5" ]]; then
 		echo -e "${Info} 已取消测试 ！" && exit 1	
 	else
@@ -1002,15 +1005,15 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
 ————————————
  ${Green_font_prefix} 6.${Font_color_suffix} 配置 KVM BBR
  ${Green_font_prefix} 7.${Font_color_suffix} 配置 OpenVZ BBR
- ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔5.9面板（官方版，不强制绑定）
- ${Green_font_prefix} 9.${Font_color_suffix} 安装宝塔7.7面板（修改版，不强制绑定）
- ${Green_font_prefix} 10.${Font_color_suffix} 升级到/更新 宝塔7.7面板（修改版，不强制绑定，只能由低版本升级）
- ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH端口（宝塔用户请在面板中修改/Centos无法使用）
+ ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔 5.9 面板（官方版，不强制绑定）
+ ${Green_font_prefix} 9.${Font_color_suffix} 安装宝塔 7.7 面板（修改版，不强制绑定）
+ ${Green_font_prefix} 10.${Font_color_suffix} 升级到/更新 宝塔 7.7 面板（修改版，不强制绑定，只能由低版本升级）
+ ${Green_font_prefix} 11.${Font_color_suffix} 修改 SSH 端口（宝塔用户请在面板中修改/Centos无法使用）
 ————————————
  ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
  ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试（跑分）
  ${Green_font_prefix} 14.${Font_color_suffix} SuperBench 修改版测试（含ChatGPT检测）
- ${Green_font_prefix} 15.${Font_color_suffix} 流媒体解锁检测（全面）
+ ${Green_font_prefix} 15.${Font_color_suffix} 流媒体解锁检测
  ${Green_font_prefix} 16.${Font_color_suffix} 三网回程测试（含路由）
  ${Green_font_prefix} 17.${Font_color_suffix} UnixBench_V4 测试（时间较长）
 
