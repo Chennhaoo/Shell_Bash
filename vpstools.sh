@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.10_02
+#	Version: 2023.03.10_03
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.10_02"
+sh_ver="2023.03.10_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -950,7 +950,7 @@ ${Green_font_prefix} 5. ${Font_color_suffix}取消测试
 		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh)
 	elif [[ ${SpeedNet_num} == "4" ]]; then
 		echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由测试，已开始测试 !"		
-		bash <(curl -sSL https://raw.githubusercontent.com/spiritLHLS/ecs/main/return.sh) Specify_IP
+		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh) Specify_IP
 	elif [[ ${SpeedNet_num} == "5" ]]; then
 		echo -e "${Info} 已取消测试 ！" && exit 1	
 	else
