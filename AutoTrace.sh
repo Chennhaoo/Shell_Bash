@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2023.03.10_03
+#	Version: 2023.03.11_01
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
@@ -260,11 +260,11 @@ IP_Check(){
 #BestTrace IPv4 回程代码 中文输出 
 BT_Ipv4_mtr_CN(){
     if [ "$2" = "tcp" ] || [ "$2" = "TCP" ]; then
-        echo -e "\nTraceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Traceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${BestTrace_file} -g cn -q 1 -n -T -m $3 $1 | tee -a $log
     elif [ "$2" = "icmp" ] || [ "$2" = "ICMP" ]; then
-        echo -e "\nTracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Tracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${BestTrace_file} -g cn -q 1 -n -m $3 $1 | tee -a $log
     else
@@ -286,18 +286,16 @@ BT_IPv4_IP_CN_Mtr(){
     IPv4_IP
     #载入BestTrace参数
     BestTrace_Mode
-    #开始测试IPv4库回程路由
- 	BT_Ipv4_mtr_CN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}"
-    BT_Ipv4_mtr_CN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}"
-    BT_Ipv4_mtr_CN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}"
-    BT_Ipv4_mtr_CN "${IPv4_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_4_name}"
-    BT_Ipv4_mtr_CN "${IPv4_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_5_name}"
-    BT_Ipv4_mtr_CN "${IPv4_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_6_name}"
-    BT_Ipv4_mtr_CN "${IPv4_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_7_name}"
-    BT_Ipv4_mtr_CN "${IPv4_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_8_name}"
-    BT_Ipv4_mtr_CN "${IPv4_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_9_name}"
-    BT_Ipv4_mtr_CN "${IPv4_10}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_10_name}"
-    BT_Ipv4_mtr_CN "${IPv4_11}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_11_name}"
+    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改  
+ 	BT_Ipv4_mtr_CN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}" "Num:1/9"
+    BT_Ipv4_mtr_CN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}" "Num:2/9"
+    BT_Ipv4_mtr_CN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}" "Num:3/9"
+    BT_Ipv4_mtr_CN "${IPv4_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_4_name}" "Num:4/9"
+    BT_Ipv4_mtr_CN "${IPv4_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_5_name}" "Num:5/9"
+    BT_Ipv4_mtr_CN "${IPv4_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_6_name}" "Num:6/9"
+    BT_Ipv4_mtr_CN "${IPv4_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_7_name}" "Num:7/9"
+    BT_Ipv4_mtr_CN "${IPv4_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_8_name}" "Num:8/9"
+    BT_Ipv4_mtr_CN "${IPv4_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_9_name}" "Num:9/9"
     #保留IPv4回程路由日志
     echo -e "${Info} 回程路由路径已保存在${Green_font_prefix} ${log} ${Font_color_suffix}中，如不需要请自行删除 !" 	
     #删除BestTrace执行文件
@@ -307,11 +305,11 @@ BT_IPv4_IP_CN_Mtr(){
 #BestTrace IPv4 回程代码 英文输出 
 BT_Ipv4_mtr_EN(){
     if [ "$2" = "tcp" ] || [ "$2" = "TCP" ]; then
-        echo -e "\nTraceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Traceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${BestTrace_file} -g en -q 1 -n -T -m $3 $1 | tee -a $log
     elif [ "$2" = "icmp" ] || [ "$2" = "ICMP" ]; then
-        echo -e "\nTracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Tracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${BestTrace_file} -g en -q 1 -n -m $3 $1 | tee -a $log
     else
@@ -333,16 +331,16 @@ BT_IPv4_IP_EN_Mtr(){
     IPv4_IP
     #载入BestTrace参数
     BestTrace_Mode
-    #开始测试IPv4库回程路由
- 	BT_Ipv4_mtr_EN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}"
-    BT_Ipv4_mtr_EN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}"
-    BT_Ipv4_mtr_EN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}"
-    BT_Ipv4_mtr_EN "${IPv4_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_4_name}"
-    BT_Ipv4_mtr_EN "${IPv4_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_5_name}"
-    BT_Ipv4_mtr_EN "${IPv4_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_6_name}"
-    BT_Ipv4_mtr_EN "${IPv4_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_7_name}"
-    BT_Ipv4_mtr_EN "${IPv4_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_8_name}"
-    BT_Ipv4_mtr_EN "${IPv4_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_9_name}"
+    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改  
+ 	BT_Ipv4_mtr_EN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}" "Num:1/9"
+    BT_Ipv4_mtr_EN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}" "Num:2/9"
+    BT_Ipv4_mtr_EN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}" "Num:3/9"
+    BT_Ipv4_mtr_EN "${IPv4_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_4_name}" "Num:4/9"
+    BT_Ipv4_mtr_EN "${IPv4_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_5_name}" "Num:5/9"
+    BT_Ipv4_mtr_EN "${IPv4_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_6_name}" "Num:6/9"
+    BT_Ipv4_mtr_EN "${IPv4_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_7_name}" "Num:7/9"
+    BT_Ipv4_mtr_EN "${IPv4_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_8_name}" "Num:8/9"
+    BT_Ipv4_mtr_EN "${IPv4_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_9_name}" "Num:9/9"
     #保留IPv4回程路由日志
     echo -e "${Info} 回程路由路径已保存在${Green_font_prefix} ${log} ${Font_color_suffix}中，如不需要请自行删除 !" 	
     #删除BestTrace执行文件
@@ -352,11 +350,11 @@ BT_IPv4_IP_EN_Mtr(){
 #Nexttrace IPv4 回程代码 中文输出 
 NT_Ipv4_mtr_CN(){
     if [ "$2" = "tcp" ] || [ "$2" = "TCP" ]; then
-        echo -e "\nTraceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Traceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${Nexttrace_file} -M -g cn -q 1 -n -T -m $3 $1 | tee -a $log
     elif [ "$2" = "icmp" ] || [ "$2" = "ICMP" ]; then
-        echo -e "\nTracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Tracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv4${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${Nexttrace_file} -M -g cn -q 1 -n -m $3 $1 | tee -a $log
     else
@@ -378,16 +376,16 @@ NT_IPv4_IP_CN_Mtr(){
     IPv4_IP
     #载入BestTrace参数
     Nexttrace_Mode
-    #开始测试IPv4库回程路由  
- 	NT_Ipv4_mtr_CN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}"
-    NT_Ipv4_mtr_CN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}"
-    NT_Ipv4_mtr_CN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}"
-    NT_Ipv4_mtr_CN "${IPv4_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_4_name}"
-    NT_Ipv4_mtr_CN "${IPv4_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_5_name}"
-    NT_Ipv4_mtr_CN "${IPv4_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_6_name}"
-    NT_Ipv4_mtr_CN "${IPv4_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_7_name}"
-    NT_Ipv4_mtr_CN "${IPv4_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_8_name}"
-    NT_Ipv4_mtr_CN "${IPv4_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_9_name}"
+    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改    
+ 	NT_Ipv4_mtr_CN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}" "Num:1/9"
+    NT_Ipv4_mtr_CN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}" "Num:2/9"
+    NT_Ipv4_mtr_CN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}" "Num:3/9"
+    NT_Ipv4_mtr_CN "${IPv4_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_4_name}" "Num:4/9"
+    NT_Ipv4_mtr_CN "${IPv4_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_5_name}" "Num:5/9"
+    NT_Ipv4_mtr_CN "${IPv4_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_6_name}" "Num:6/9"
+    NT_Ipv4_mtr_CN "${IPv4_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_7_name}" "Num:7/9"
+    NT_Ipv4_mtr_CN "${IPv4_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_8_name}" "Num:8/9"
+    NT_Ipv4_mtr_CN "${IPv4_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_9_name}" "Num:9/9"
     #保留IPv4回程路由日志
     echo -e "${Info} 回程路由路径已保存在${Green_font_prefix} ${log} ${Font_color_suffix}中，如不需要请自行删除 !" 	
     #删除Nexttrace执行文件
@@ -428,11 +426,11 @@ IPv4_IP(){
 #Nexttrace IPv6 回程代码 中文输出 
 NT_Ipv6_mtr_CN(){
     if [ "$2" = "tcp" ] || [ "$2" = "TCP" ]; then
-        echo -e "\nTraceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Traceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${Nexttrace_file} -M -g cn -q 1 -n -T -m $3 $1 | tee -a $log
     elif [ "$2" = "icmp" ] || [ "$2" = "ICMP" ]; then
-        echo -e "\nTracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Tracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${Nexttrace_file} -M -g cn -q 1 -n -m $3 $1 | tee -a $log
     else
@@ -454,16 +452,16 @@ NT_IPv6_IP_CN_Mtr(){
     IPv6_IP
     #载入BestTrace参数
     Nexttrace_Mode
-    #开始测试IPv6库回程路由  
- 	NT_Ipv6_mtr_CN "${IPv6_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_1_name}"
-    NT_Ipv6_mtr_CN "${IPv6_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_2_name}"
-    NT_Ipv6_mtr_CN "${IPv6_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_3_name}"  
-    NT_Ipv6_mtr_CN "${IPv6_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_4_name}" 
-    NT_Ipv6_mtr_CN "${IPv6_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_5_name}" 
-    NT_Ipv6_mtr_CN "${IPv6_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_6_name}" 
-    NT_Ipv6_mtr_CN "${IPv6_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_7_name}" 
-    NT_Ipv6_mtr_CN "${IPv6_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_8_name}" 
-    NT_Ipv6_mtr_CN "${IPv6_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_9_name}" 
+    #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改    
+ 	NT_Ipv6_mtr_CN "${IPv6_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_1_name}" "Num:1/9"
+    NT_Ipv6_mtr_CN "${IPv6_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_2_name}" "Num:2/9"
+    NT_Ipv6_mtr_CN "${IPv6_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_3_name}" "Num:3/9" 
+    NT_Ipv6_mtr_CN "${IPv6_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_4_name}" "Num:4/9" 
+    NT_Ipv6_mtr_CN "${IPv6_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_5_name}" "Num:5/9" 
+    NT_Ipv6_mtr_CN "${IPv6_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_6_name}" "Num:6/9" 
+    NT_Ipv6_mtr_CN "${IPv6_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_7_name}" "Num:7/9" 
+    NT_Ipv6_mtr_CN "${IPv6_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_8_name}" "Num:8/9" 
+    NT_Ipv6_mtr_CN "${IPv6_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_9_name}" "Num:9/9" 
     #保留IPv6回程路由日志
     echo -e "${Info} 回程路由路径已保存在${Green_font_prefix} ${log} ${Font_color_suffix}中，如不需要请自行删除 !" 	
     #删除Nexttrace执行文件
@@ -473,11 +471,11 @@ NT_IPv6_IP_CN_Mtr(){
 #Nexttrace IPv6 回程代码 英文输出 
 NT_Ipv6_mtr_EN(){
     if [ "$2" = "tcp" ] || [ "$2" = "TCP" ]; then
-        echo -e "\nTraceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Traceroute to $4 (${Green_font_prefix}TCP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${Nexttrace_file} -M -g en -q 1 -n -T -m $3 $1 | tee -a $log
     elif [ "$2" = "icmp" ] || [ "$2" = "ICMP" ]; then
-        echo -e "\nTracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
+        echo -e "\n$5 Tracecroute to $4 (${Green_font_prefix}ICMP Mode${Font_color_suffix}, Max $3 Hop, ${Green_font_prefix}IPv6${Font_color_suffix})" | tee -a $log
         echo -e "============================================================" | tee -a $log
         ${Nexttrace_file} -M -g en -q 1 -n -m $3 $1 | tee -a $log
     else
@@ -499,16 +497,16 @@ NT_IPv6_IP_EN_Mtr(){
     IPv6_IP
     #载入BestTrace参数
     Nexttrace_Mode
-    #开始测试IPv6库回程路由  
- 	NT_Ipv6_mtr_EN "${IPv6_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_1_name}"
-    NT_Ipv6_mtr_EN "${IPv6_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_2_name}"
-    NT_Ipv6_mtr_EN "${IPv6_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_3_name}"  
-    NT_Ipv6_mtr_EN "${IPv6_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_4_name}" 
-    NT_Ipv6_mtr_EN "${IPv6_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_5_name}" 
-    NT_Ipv6_mtr_EN "${IPv6_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_6_name}" 
-    NT_Ipv6_mtr_EN "${IPv6_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_7_name}" 
-    NT_Ipv6_mtr_EN "${IPv6_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_8_name}" 
-    NT_Ipv6_mtr_EN "${IPv6_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_9_name}" 
+    #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改  
+ 	NT_Ipv6_mtr_EN "${IPv6_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_1_name}" "Num:1/9"
+    NT_Ipv6_mtr_EN "${IPv6_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_2_name}" "Num:2/9"
+    NT_Ipv6_mtr_EN "${IPv6_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_3_name}" "Num:3/9"  
+    NT_Ipv6_mtr_EN "${IPv6_4}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_4_name}" "Num:4/9" 
+    NT_Ipv6_mtr_EN "${IPv6_5}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_5_name}" "Num:5/9" 
+    NT_Ipv6_mtr_EN "${IPv6_6}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_6_name}" "Num:6/9" 
+    NT_Ipv6_mtr_EN "${IPv6_7}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_7_name}" "Num:7/9" 
+    NT_Ipv6_mtr_EN "${IPv6_8}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_8_name}" "Num:8/9" 
+    NT_Ipv6_mtr_EN "${IPv6_9}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_9_name}" "Num:9/9" 
     #保留IPv6回程路由日志
     echo -e "${Info} 回程路由路径已保存在${Green_font_prefix} ${log} ${Font_color_suffix}中，如不需要请自行删除 !" 	
     #删除Nexttrace执行文件
@@ -1010,7 +1008,7 @@ NT_Specify_IPv6_EN_Mtr(){
 #启动菜单区===============================================
 #脚本不加参数时的启动菜单
 Stand_AutoTrace(){
-echo -e " 服务器信息（优先显示IPv4）：
+echo -e " 服务器信息（优先显示IPv4，仅供参考）：
 ————————————————————————————————————
  ISP      :${Red_font_prefix} $ISP_Print ${Font_color_suffix} 
  ASN      :${Red_font_prefix} $ASN_Print ${Font_color_suffix}
@@ -1021,7 +1019,7 @@ echo -e " 服务器信息（优先显示IPv4）：
  IPv6地址 :${Red_font_prefix} $IPv6_Print ${Font_color_suffix}
  IP 性质  :${Red_font_prefix} $TYPE_Print ${Font_color_suffix}
 
- 测试项（TCP Mode）：
+ 测试项（TCP Mode，三网回程测试点均为 9 个）：
 ————————————————————————————————————
 ${Green_font_prefix} 1. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 BestTrace库（默认）
 ${Green_font_prefix} 2. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 Nexttrace库
