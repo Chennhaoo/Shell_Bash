@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2023.03.11_01
+#	Version: 2023.03.11_02
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
@@ -286,7 +286,8 @@ BT_IPv4_IP_CN_Mtr(){
     IPv4_IP
     #载入BestTrace参数
     BestTrace_Mode
-    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改  
+    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改
+    clear  
  	BT_Ipv4_mtr_CN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}" "Num:1/9"
     BT_Ipv4_mtr_CN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}" "Num:2/9"
     BT_Ipv4_mtr_CN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}" "Num:3/9"
@@ -331,7 +332,8 @@ BT_IPv4_IP_EN_Mtr(){
     IPv4_IP
     #载入BestTrace参数
     BestTrace_Mode
-    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改  
+    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改
+    clear  
  	BT_Ipv4_mtr_EN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}" "Num:1/9"
     BT_Ipv4_mtr_EN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}" "Num:2/9"
     BT_Ipv4_mtr_EN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}" "Num:3/9"
@@ -376,7 +378,8 @@ NT_IPv4_IP_CN_Mtr(){
     IPv4_IP
     #载入BestTrace参数
     Nexttrace_Mode
-    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改    
+    #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改
+    clear    
  	NT_Ipv4_mtr_CN "${IPv4_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_1_name}" "Num:1/9"
     NT_Ipv4_mtr_CN "${IPv4_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_2_name}" "Num:2/9"
     NT_Ipv4_mtr_CN "${IPv4_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv4_3_name}" "Num:3/9"
@@ -452,7 +455,8 @@ NT_IPv6_IP_CN_Mtr(){
     IPv6_IP
     #载入BestTrace参数
     Nexttrace_Mode
-    #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改    
+    #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改
+    clear    
  	NT_Ipv6_mtr_CN "${IPv6_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_1_name}" "Num:1/9"
     NT_Ipv6_mtr_CN "${IPv6_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_2_name}" "Num:2/9"
     NT_Ipv6_mtr_CN "${IPv6_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_3_name}" "Num:3/9" 
@@ -497,7 +501,8 @@ NT_IPv6_IP_EN_Mtr(){
     IPv6_IP
     #载入BestTrace参数
     Nexttrace_Mode
-    #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改  
+    #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改
+    clear  
  	NT_Ipv6_mtr_EN "${IPv6_1}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_1_name}" "Num:1/9"
     NT_Ipv6_mtr_EN "${IPv6_2}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_2_name}" "Num:2/9"
     NT_Ipv6_mtr_EN "${IPv6_3}" "${Net_Mode}" "${Hop_Mode}" "${IPv6_3_name}" "Num:3/9"  
