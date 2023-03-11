@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.10_03
+#	Version: 2023.03.11_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.10_03"
+sh_ver="2023.03.11_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -19,6 +19,7 @@ BH_file="${file}/bench.sh"
 UB_file="${file}/unixbench.sh"
 YB_file="${file}/yabs.sh"
 SB_file="${file}/superbench.sh"
+AutoTrace_file="${file}/AutoTrace.sh"
 lkl_Haproxy_C_file="${file}/tcp_nanqinlang-haproxy-centos.sh"
 lkl_Haproxy_D_file="${file}/tcp_nanqinlang-haproxy-debian.sh"
 lkl_Rinetd_C_file="${file}/tcp_nanqinlang-rinetd-centos.sh"
@@ -923,7 +924,7 @@ Install_LMT(){
 }
 
 #三网回程测试（含路由）
-Install_SpeedNet(){
+Install_SpeedNet(){	
 	clear
 echo -e " 请选择需要的测试项
 ————————————————————————————————————
@@ -946,15 +947,52 @@ ${Green_font_prefix} 5. ${Font_color_suffix}取消测试
 		bash <(curl -sSL https://raw.githubusercontent.com/veoco/bim-core/main/hyperspeed.sh)
 	elif [[ ${SpeedNet_num} == "3" ]]; then
 		echo -e "${Info} 您选择的是：本机 IPv4/IPv6 三网回程路由测试，已开始测试 !
-		"		
-		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh)
+		"
+		#下载脚本
+		AutoTrace_DL
+		#执行脚本		
+		bash "${AutoTrace_file}"
+		#删除脚本
+		rm -rf "${AutoTrace_file}"
+		if [[ -e ${AutoTrace_file} ]]; then
+			echo -e "${Error} 删除脚本失败，请手动删除 ${AutoTrace_file}"
+		else	
+			echo -e "${Info} 已删除脚本"
+		fi		
 	elif [[ ${SpeedNet_num} == "4" ]]; then
-		echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由测试，已开始测试 !"		
-		bash <(curl -sSL https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh) Specify_IP
+		echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由测试，已开始测试 !
+		"
+		#下载脚本
+		AutoTrace_DL
+		#执行脚本		
+		bash "${AutoTrace_file}" Specify_IP
+		#删除脚本
+		rm -rf "${AutoTrace_file}"
+		if [[ -e ${AutoTrace_file} ]]; then
+			echo -e "${Error} 删除脚本失败，请手动删除 ${AutoTrace_file}"
+		else	
+			echo -e "${Info} 已删除脚本"
+		fi				
 	elif [[ ${SpeedNet_num} == "5" ]]; then
 		echo -e "${Info} 已取消测试 ！" && exit 1	
 	else
 		echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
+	fi
+}
+
+#因为AutoTrace脚本涉及文件下载，不太适合临时目录执行，如果选择AutoTrace，先下载到本地
+AutoTrace_DL(){
+	if [[ -e ${AutoTrace_file} ]]; then
+		rm -rf "${AutoTrace_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
+	else	
+		echo -e "${Error} 没有发现 AutoTrace 测试脚本，开始下载..."
+	fi
+	cd "${file}"
+	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh; then
+		echo -e "${Error} AutoTrace 测试脚本下载失败 !" && exit 1
+	else
+		echo -e "${Info} AutoTrace 测试脚本下载完成 !"
+		chmod +x "${AutoTrace_file}"
 	fi
 }
 
@@ -991,6 +1029,7 @@ Install_UB(){
 
 #显示菜单
 check_sys
+check_root
 input_BL
 clear
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
