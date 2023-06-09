@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2023.06.09_01
+#	Version: 2023.06.09_02
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
@@ -398,28 +398,28 @@ NT_IPv4_IP_CN_Mtr(){
 #IP v4 库
 IPv4_IP(){
     #电信
-    IPv4_1="113.108.209.1"
-    IPv4_1_name="中国 广州 电信"
+    IPv4_1="59.36.216.1"
+    IPv4_1_name="中国 深圳 电信"
     
-    IPv4_2="180.153.28.5"
+    IPv4_2="101.226.41.65"
     IPv4_2_name="中国 上海 电信"
     
-    IPv4_3="180.149.128.9"
+    IPv4_3="220.181.53.1"
     IPv4_3_name="中国 北京 电信"   
     #联通
     IPv4_4="210.21.4.130"
     IPv4_4_name="中国 广州 联通"
     
-    IPv4_5="58.247.8.158"
+    IPv4_5="112.65.95.129"
     IPv4_5_name="中国 上海 联通"
     
-    IPv4_6="123.125.99.1"
+    IPv4_6="61.49.140.217"
     IPv4_6_name="中国 北京 联通"
     #移动
-    IPv4_7="120.196.212.25"
-    IPv4_7_name="中国 广州 移动"
+    IPv4_7="120.233.53.1"
+    IPv4_7_name="中国 深圳 移动"
     
-    IPv4_8="221.183.55.22"
+    IPv4_8="183.194.216.129"
     IPv4_8_name="中国 上海 移动"
     
     IPv4_9="211.136.25.153"
