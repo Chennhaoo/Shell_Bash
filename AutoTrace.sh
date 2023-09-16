@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2023.06.09_02
+#	Version: 2023.09.16_01
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
@@ -155,8 +155,19 @@ IP_Check(){
       Region_4E=$(expr "${IP_4}" : '.*region\":[ ]*\"\([^"]*\).*')
       Region_code_4E=$(expr "${IP_4}" : '.*region_code\":[ ]*\"\([^"]*\).*')
       Location_4E="$City_4E, $Region_4E ($Region_code_4E)"
+      #IP欺诈分数
+      FRAUD_SCORE_4=$(curl -m10 -sL -H "Referer: https://scamalytics.com" \
+      "https://scamalytics.com/ip/$WAN_4" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
       #输出IP的类型：数据中心/家庭宽带/商业宽带/移动流量/内容分发网络/搜索引擎蜘蛛/教育网/未知
-      TYPE_4_Temp=$(curl -4m5 -A Mozilla -sSL https://www.abuseipdb.com/check/"${WAN_4}" 2>/dev/null | grep -A2 '<th>Usage Type</th>' | tail -n 1 ) 
+      #使用abuseipdb.com的API进行探测，每日1000次请求
+      TYPE_4_Temp=$(curl -sG https://api.abuseipdb.com/api/v2/check \
+      --data-urlencode "ipAddress=$WAN_4" \
+      -d maxAgeInDays=90 \
+      -d verbose \
+      -H "Key: c97ab9480e282182aeac0408b788fad9e41d3ef5aa12d294b3fe8b50cfeb4edf43351bbe4870b066" \
+      -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g;s/v//g')
+      #老代码，已失效
+      #TYPE_4_Temp=$(curl -4m5 -A Mozilla -sSL https://www.abuseipdb.com/check/"${WAN_4}" 2>/dev/null | grep -A2 '<th>Usage Type</th>' | tail -n 1 ) 
         if [[ ${TYPE_4_Temp} == "Data Center/Web Hosting/Transit" ]]; then
             TYPE_4="数据中心"
         elif [[ ${TYPE_4_Temp} == "Fixed Line ISP" ]]; then
@@ -171,10 +182,10 @@ IP_Check(){
             TYPE_4="搜索引擎蜘蛛"
         elif [[ ${TYPE_4_Temp} == "University/College/School" ]]; then
             TYPE_4="教育网"
-        elif [[ ${TYPE_4_Temp} == "Unknown" ]]; then
-            TYPE_4="未知 IP 网络类型"
+#        elif [[ ${TYPE_4_Temp} == "Unknown" ]]; then
+#            TYPE_4="未知 IP 网络类型"
         elif [[ ${TYPE_4_Temp} == "" ]]; then
-            TYPE_4="网络不通或未知错误"             
+            TYPE_4="未知 IP 网络类型"             
         fi           
     fi  
 
@@ -198,8 +209,19 @@ IP_Check(){
       Region_6E=$(expr "${IP_6}" : '.*region\":[ ]*\"\([^"]*\).*')
       Region_code_6E=$(expr "${IP_6}" : '.*region_code\":[ ]*\"\([^"]*\).*')
       Location_6E="$City_6E, $Region_6E ($Region_code_6E)"
+      #IP欺诈分数
+      FRAUD_SCORE_6=$(curl -m10 -sL -H "Referer: https://scamalytics.com" \
+      "https://scamalytics.com/ip/$WAN_6" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
       #输出IP的类型：数据中心/家庭宽带/商业宽带/移动流量/内容分发网络/搜索引擎蜘蛛/教育网/未知
-      TYPE_6_Temp=$(curl -6m5 -A Mozilla -sSL https://www.abuseipdb.com/check/"${WAN_6}" 2>/dev/null | grep -A2 '<th>Usage Type</th>' | tail -n 1 ) 
+      #使用abuseipdb.com的API进行探测，每日1000次请求
+      TYPE_6_Temp=$(curl -sG https://api.abuseipdb.com/api/v2/check \
+      --data-urlencode "ipAddress=$WAN_6" \
+      -d maxAgeInDays=90 \
+      -d verbose \
+      -H "Key: c97ab9480e282182aeac0408b788fad9e41d3ef5aa12d294b3fe8b50cfeb4edf43351bbe4870b066" \
+      -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g;s/v//g')
+      #老代码，已失效
+      #TYPE_6_Temp=$(curl -6m5 -A Mozilla -sSL https://www.abuseipdb.com/check/"${WAN_6}" 2>/dev/null | grep -A2 '<th>Usage Type</th>' | tail -n 1 ) 
       	if [[ ${TYPE_6_Temp} == "Data Center/Web Hosting/Transit" ]]; then
             TYPE_6="数据中心"
         elif [[ ${TYPE_6_Temp} == "Fixed Line ISP" ]]; then
@@ -214,10 +236,10 @@ IP_Check(){
             TYPE_6="搜索引擎蜘蛛"
         elif [[ ${TYPE_6_Temp} == "University/College/School" ]]; then
             TYPE_6="教育网"
-        elif [[ ${TYPE_6_Temp} == "Unknown" ]]; then
-            TYPE_6="未知 IP 网络类型" 
+#        elif [[ ${TYPE_6_Temp} == "Unknown" ]]; then
+#            TYPE_6="未知 IP 网络类型" 
         elif [[ ${TYPE_6_Temp} == "" ]]; then
-            TYPE_6="网络不通或未知错误"               
+            TYPE_6="未知 IP 网络类型"               
         fi          
     fi
 
@@ -239,13 +261,15 @@ IP_Check(){
         Host_Print="${Host_4}"
         COUNTRY_Print="${COUNTRY_4E}"
         Location_Print="${Location_4E}"
+        FRAUD_SCORE="${FRAUD_SCORE_4}"
         TYPE_Print="${TYPE_4}"
-    elif [[ -n ${WAN_P} ]]; then 
+    elif [[ -n ${WAN_6} ]]; then 
         ISP_Print="${ISP_6}"
         ASN_Print="${ASN_6}"
         Host_Print="${Host_6}"
         COUNTRY_Print="${COUNTRY_6E}"
         Location_Print="${Location_6E}"
+        FRAUD_SCORE="${FRAUD_SCORE_6}"
         TYPE_Print="${TYPE_6}"
     else
         ISP_Print="网络连接出错，无法探测"
@@ -253,6 +277,7 @@ IP_Check(){
         Host_Print="网络连接出错，无法探测"
         COUNTRY_Print="网络连接出错，无法探测"
         Location_Print="网络连接出错，无法探测"
+        FRAUD_SCORE="网络连接出错，无法探测"
         TYPE_Print="网络连接出错，无法探测"   
     fi    
 }
@@ -927,9 +952,9 @@ NT_Specify_IPv4_CN_Mtr(){
     Int_IPV4_P
     #删除之前的日志及执行文件 
     AutoTrace_Start
-    #下载BestTrace主程序
+    #下载Nexttrace主程序
     Nexttrace_Ver
-    #载入BestTrace参数
+    #载入Nexttrace参数
     Nexttrace_Mode
     clear
     #开始测试到指定IPv4路由  
@@ -956,9 +981,9 @@ NT_Specify_IPv6_CN_Mtr(){
     Int_IPV6
     #删除之前的日志及执行文件 
     AutoTrace_Start
-    #下载BestTrace主程序
+    #下载Nexttrace主程序
     Nexttrace_Ver
-    #载入BestTrace参数
+    #载入Nexttrace参数
     Nexttrace_Mode
     clear
     #开始测试到指定IPv4路由  
@@ -985,9 +1010,9 @@ NT_Specify_IPv6_EN_Mtr(){
     Int_IPV6
     #删除之前的日志及执行文件 
     AutoTrace_Start
-    #下载BestTrace主程序
+    #下载Nexttrace主程序
     Nexttrace_Ver
-    #载入BestTrace参数
+    #载入Nexttrace参数
     Nexttrace_Mode
     clear
     #开始测试到指定IPv4路由  
@@ -1023,19 +1048,22 @@ echo -e " 服务器信息（优先显示IPv4，仅供参考）：
  IPv4地址 :${Red_font_prefix} $IPv4_Print ${Font_color_suffix}
  IPv6地址 :${Red_font_prefix} $IPv6_Print ${Font_color_suffix}
  IP 性质  :${Red_font_prefix} $TYPE_Print ${Font_color_suffix}
+ IP 危险性:${Red_font_prefix} $FRAUD_SCORE/100（建议小于60分，越高说明IP可能存在滥用） ${Font_color_suffix}
 
  测试项（TCP Mode，三网回程测试点均为 9 个）：
 ————————————————————————————————————
-${Green_font_prefix} 1. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 BestTrace库（默认）
-${Green_font_prefix} 2. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 Nexttrace库
+${Green_font_prefix} 1. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 BestTrace库
+${Green_font_prefix} 2. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}（默认）
 ${Green_font_prefix} 3. ${Font_color_suffix}本机 IPv4 三网回程路由 英文 输出 BestTrace库
-${Green_font_prefix} 4. ${Font_color_suffix}本机 IPv6 三网回程路由 中文 输出 Nexttrace库
-${Green_font_prefix} 5. ${Font_color_suffix}本机 IPv6 三网回程路由 英文 输出 Nexttrace库
+${Green_font_prefix} 4. ${Font_color_suffix}本机 IPv6 三网回程路由 中文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}
+${Green_font_prefix} 5. ${Font_color_suffix}本机 IPv6 三网回程路由 英文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}
 ${Green_font_prefix} 6. ${Font_color_suffix}本机到指定 IPv4/IPv6 路由（BestTrace/Nexttrace）
 ${Green_font_prefix} 7. ${Font_color_suffix}退出测试
+
+ 注：目前BestTrace存在请求过多直接403的问题，三网回程尽量不要选BestTrace库。
     " 
-    read -e -p " 请输入需要的测试项 [1-7] ( 默认：1 ）：" Stand_AutoTrace_num
-    [[ -z "${Stand_AutoTrace_num}" ]] && Stand_AutoTrace_num="1"
+    read -e -p " 请输入需要的测试项 [1-7] ( 默认：2 ）：" Stand_AutoTrace_num
+    [[ -z "${Stand_AutoTrace_num}" ]] && Stand_AutoTrace_num="2"
     if [[ ${Stand_AutoTrace_num} == "1" ]]; then
         echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 中文 输出 BestTrace库，已开始测试 !
         "
