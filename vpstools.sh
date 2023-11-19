@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.03.11_01
+#	Version: 2023.11.19_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.03.11_01"
+sh_ver="2023.11.19_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -177,8 +177,17 @@ VPS_Virt(){
 	else
 		virt=`virt-what`
 		if [[ -z ${virt} ]]; then
-			echo -e "${Error} 系统架构检查失败 !" && exit 1
-		fi
+		echo "您是物理主机吗 ？[y/N]" && echo
+		stty erase '^H' && read -p "(默认: N):" unyn 
+			[[ -z "${unyn}" ]] && echo -e "${Error} 系统架构检查失败 !" && exit 1
+			if [[ ${unyn} == [Nn] ]]; then
+				echo -e "${Error} 系统架构检查失败 !" && exit 1
+			elif [[ ${unyn} == [Yy] ]]; then
+				virt="物理主机"
+			else
+				echo -e "${Info} 请正确输入 " && exit 1
+			fi
+		fi	
 	fi
 }
 
