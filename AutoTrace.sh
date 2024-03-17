@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2024.03.17_01
+#	Version: 2024.03.17_02
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
@@ -1060,8 +1060,8 @@ echo -e " 服务器信息（优先显示IPv4，仅供参考）：
 
  测试项（TCP Mode，三网回程测试点均为 9 个）：
 ————————————————————————————————————
-${Green_font_prefix} 1. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 BestTrace库
-${Red_font_prefix} 2. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}（默认）
+${Green_font_prefix} 1. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 BestTrace库（默认）
+${Red_font_prefix} 2. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}
 ${Green_font_prefix} 3. ${Font_color_suffix}本机 IPv4 三网回程路由 英文 输出 BestTrace库
 
 ${Red_font_prefix} 4. ${Font_color_suffix}本机 IPv6 三网回程路由 中文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}
@@ -1071,10 +1071,10 @@ ${Green_font_prefix} 6. ${Font_color_suffix}本机到指定 IPv4/IPv6 路由（B
 ${Green_font_prefix} 7. ${Font_color_suffix}退出测试
 
 
- 注意：目前BestTrace存在请求过多直接403的问题，三网回程尽量不要选BestTrace库。
+ 注意：若 BestTrace 出现403错误，请使用 Nexttrace 重新测试。
     " 
-    read -e -p " 请输入需要的测试项 [1-7] ( 默认：2 ）：" Stand_AutoTrace_num
-    [[ -z "${Stand_AutoTrace_num}" ]] && Stand_AutoTrace_num="2"
+    read -e -p " 请输入需要的测试项 [1-7] ( 默认：1 ）：" Stand_AutoTrace_num
+    [[ -z "${Stand_AutoTrace_num}" ]] && Stand_AutoTrace_num="1"
     if [[ ${Stand_AutoTrace_num} == "1" ]]; then
         echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 中文 输出 BestTrace库，即将开始测试!  Ctrl+C 取消！
         "
