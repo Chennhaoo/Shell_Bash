@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2023.09.17_01
+#	Version: 2024.03.17_01
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
@@ -27,6 +27,7 @@ Nexttrace_dir="${file}/Nexttrace"
 Nexttrace_file="${file}/Nexttrace/nexttrace_IP"
 log="${file}/AutoTrace_Mtr.log"
 true > $log
+rep_time=$( date -R )
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -632,7 +633,9 @@ AutoTrace_Start(){
     #检测当下目录Nexttrace文件夹，如有则删除
     Nexttrace_Dle
     #删除当前目录下的路由路径文件
-    Log_Dle   
+    Log_Dle
+    #开始生成本次报告的时间
+    echo -e "${Info} 本报告生成时间：${rep_time}" | tee -a $log  
 }
 
 #BestTrace版本下载
@@ -1053,49 +1056,52 @@ echo -e " 服务器信息（优先显示IPv4，仅供参考）：
  IPv4地址 : $IPv4_Print
  IPv6地址 : $IPv6_Print
  IP 性质  : $TYPE_Print
- IP 危险性: $FRAUD_SCORE/100（建议小于60分，越高说明IP可能存在滥用欺诈行为）
+ IP 危险性: $FRAUD_SCORE/100（建议小于60分，分数越高说明 IP 可能存在滥用欺诈行为）
 
  测试项（TCP Mode，三网回程测试点均为 9 个）：
 ————————————————————————————————————
 ${Green_font_prefix} 1. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 BestTrace库
 ${Red_font_prefix} 2. ${Font_color_suffix}本机 IPv4 三网回程路由 中文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}（默认）
 ${Green_font_prefix} 3. ${Font_color_suffix}本机 IPv4 三网回程路由 英文 输出 BestTrace库
+
 ${Red_font_prefix} 4. ${Font_color_suffix}本机 IPv6 三网回程路由 中文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}
 ${Red_font_prefix} 5. ${Font_color_suffix}本机 IPv6 三网回程路由 英文 输出 ${Red_font_prefix}Nexttrace库${Font_color_suffix}
+
 ${Green_font_prefix} 6. ${Font_color_suffix}本机到指定 IPv4/IPv6 路由（BestTrace/Nexttrace）
 ${Green_font_prefix} 7. ${Font_color_suffix}退出测试
 
- 注：目前BestTrace存在请求过多直接403的问题，三网回程尽量不要选BestTrace库。
+
+ 注意：目前BestTrace存在请求过多直接403的问题，三网回程尽量不要选BestTrace库。
     " 
     read -e -p " 请输入需要的测试项 [1-7] ( 默认：2 ）：" Stand_AutoTrace_num
     [[ -z "${Stand_AutoTrace_num}" ]] && Stand_AutoTrace_num="2"
     if [[ ${Stand_AutoTrace_num} == "1" ]]; then
-        echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 中文 输出 BestTrace库，即将开始测试!
+        echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 中文 输出 BestTrace库，即将开始测试!  Ctrl+C 取消！
         "
-        sleep 3s
+        sleep 4s
         BT_IPv4_IP_CN_Mtr
     elif [[ ${Stand_AutoTrace_num} == "2" ]]; then            
-        echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 中文 输出 Nexttrace库，即将开始测试!
+        echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 中文 输出 Nexttrace库，即将开始测试!  Ctrl+C 取消！
         "
-        sleep 3s
+        sleep 4s
         NT_IPv4_IP_CN_Mtr 
     elif [[ ${Stand_AutoTrace_num} == "3" ]]; then     
-        echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 英文 输出 BestTrace库，即将开始测试!
+        echo -e "${Info} 您选择的是：本机 IPv4 三网回程路由 英文 输出 BestTrace库，即将开始测试!  Ctrl+C 取消！
         "
-        sleep 3s
+        sleep 4s
         BT_IPv4_IP_EN_Mtr
     elif [[ ${Stand_AutoTrace_num} == "4" ]]; then 
-        echo -e "${Info} 您选择的是：本机 IPv6 三网回程路由 中文 输出 Nexttrace库，即将开始测试!
+        echo -e "${Info} 您选择的是：本机 IPv6 三网回程路由 中文 输出 Nexttrace库，即将开始测试!  Ctrl+C 取消！
         "
-        sleep 3s
+        sleep 4s
         NT_IPv6_IP_CN_Mtr
     elif [[ ${Stand_AutoTrace_num} == "5" ]]; then 
-        echo -e "${Info} 您选择的是：本机 IPv6 三网回程路由 英文 输出 Nexttrace库，即将开始测试!
+        echo -e "${Info} 您选择的是：本机 IPv6 三网回程路由 英文 输出 Nexttrace库，即将开始测试!  Ctrl+C 取消！
         "
-        sleep 3s
+        sleep 4s
         NT_IPv6_IP_EN_Mtr 
     elif [[ ${Stand_AutoTrace_num} == "6" ]]; then 
-        echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由（BestTrace/Nexttrace），即将开始测试!
+        echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由（BestTrace/Nexttrace），即将开始测试!  Ctrl+C 取消！
         "
         sleep 3s
         Specify_IP
