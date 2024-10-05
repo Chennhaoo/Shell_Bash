@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2023.11.19_01
+#	Version: 2024.10.05_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2023.11.19_01"
+sh_ver="2024.10.05_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -646,7 +646,7 @@ BT_Panel_7.7(){
 	clear
 	[[ -e ${BT_Panel} ]] && echo -e "${Error} 宝塔面板已安装，请访问https://www.bt.cn/btcode.html查询卸载方法" && exit 1
 echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
- 本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-1.html
+ 本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-275.html
  安装时会安装3.7版本Python，存在兼容风险。修改版存在一定风险或后门，安装前请备份好重要数据
  请多关注作者网站，如有漏洞更新可通过本脚本中${Green_font_prefix} 升级到宝塔7.7面板 ${Font_color_suffix}命令更新
 ———————— 
@@ -663,7 +663,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo -e "${Info} 已取消..." && exit 1
 			else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && bash install_panel.sh
+				wget -N --no-check-certificate https://down.baota.me/project/bt_panel/script/install_7.7.0_lite.sh && bash install_7.7.0_lite.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
@@ -671,7 +671,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo -e "${Info} 已取消..." && exit 1
 			else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && bash install_panel.sh
+				wget -N --no-check-certificate https://down.baota.me/project/bt_panel/script/install_7.7.0_lite.sh && bash install_7.7.0_lite.sh
 			fi
 		elif [[ ${release} == "ubuntu" ]]; then
 			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
@@ -679,7 +679,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo -e "${Info} 已取消..." && exit 1
 			else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/install_panel.sh && sudo bash install_panel.sh
+				wget -N --no-check-certificate https://down.baota.me/project/bt_panel/script/install_7.7.0_lite.sh && bash install_7.7.0_lite.sh
 			fi
 		else
 			echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
@@ -691,10 +691,10 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 UPDATE_BT_Panel_7.7(){
 	clear
 echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
- 本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-1.html
+ 本脚本为宝塔迷修改版，详细信息：https://www.baota.me/post-275.html
  安装时会安装3.7版本Python，存在兼容风险。修改版存在一定风险或后门，安装前请备份好重要数据
  请多关注作者网站，如有漏洞更新可通过本脚本中${Green_font_prefix} 升级到宝塔7.7面板 ${Font_color_suffix}命令更新
- 本脚本仅支持${Red_font_prefix} 由低版本升级或更新7.7版本 ${Font_color_suffix}，不支持降级，降版本请访问：https://www.baota.me/post-37.html
+ 本脚本仅支持${Red_font_prefix} 由低版本升级或更新7.7版本 ${Font_color_suffix}，不支持降级，降版本请访问：https://www.baota.me/post-275.html
 ———————— 
  请问是否需要升级? [y/N]
 	 "
@@ -709,7 +709,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo && echo -e "${Info} 已取消..." && exit 1
 			else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && bash update_panel.sh
+				wget -N --no-check-certificate https://down.baota.me/project/bt_panel/script/update_7.7.0_lite.sh && bash update_7.7.0_lite.sh
 			fi
 		elif [[ ${release} == "debian" ]]; then
 			echo "请确定您是 Debian 系统吗？[y/N]" && echo
@@ -717,7 +717,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo -e "${Info} 已取消..." && exit 1
 			else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && bash update_panel.sh
+				wget -N --no-check-certificate https://down.baota.me/project/bt_panel/script/update_7.7.0_lite.sh && bash update_7.7.0_lite.sh
 			fi
 		elif [[ ${release} == "ubuntu" ]]; then
 			echo "请确定您是 Ubuntu 系统吗?[y/N]" && echo
@@ -725,7 +725,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 			if [[ ${unyn} == [Nn] ]]; then
 				echo -e "${Info} 已取消..." && exit 1
 			else
-				wget -N --no-check-certificate https://www.baota.me/script/linux_panel/update_panel.sh && sudo bash update_panel.sh
+				wget -N --no-check-certificate https://down.baota.me/project/bt_panel/script/update_7.7.0_lite.sh && bash update_7.7.0_lite.sh
 			fi
 		else
 			echo -e "${Error} 您的系统无法探测到，请访问宝塔官网安装！" && exit 1
