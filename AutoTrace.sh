@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2024.10.31_03"
+sh_ver="2024.10.31_04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -1216,10 +1216,10 @@ Specify_IP_AutoTrace(){
 #脚本运行区
 echo -e "${Info} 脚本正在初始化，请稍等 ！"
 check_sys
+checkver
 IP_Check
 check_root
 statistics_of_run-times
-checkver
 clear 
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 
