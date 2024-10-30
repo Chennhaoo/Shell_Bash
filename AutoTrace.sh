@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2024.10.31_04"
+sh_ver="2024.10.31_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -150,6 +150,7 @@ checkver() {
         echo -e "本脚本已是最新脚本无需更新"
         rm -rf AutoTrace_update.sh*
     fi
+    sleep 2s
 }
 
 #检测IPv4、IPv6状态
