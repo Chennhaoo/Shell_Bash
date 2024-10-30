@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2024.10.31_04"
+sh_ver="2024.10.31_05"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -1214,6 +1214,7 @@ Specify_IP_AutoTrace(){
 
 
 #脚本运行区
+clear
 echo -e "${Info} 脚本正在初始化，请稍等 ！"
 check_sys
 checkver
