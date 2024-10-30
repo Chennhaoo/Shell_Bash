@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2024.10.30_03"
+sh_ver="2024.10.31_04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -137,11 +137,13 @@ statistics_of_run-times() {
 
 #脚本版本更新
 checkver() {
-    running_version=$(sed -n '7s/sh_ver="\(.*\)"/\1/p' "$0")
+    running_version=$(sed -n '22s/sh_ver="\(.*\)"/\1/p' "$0")
     curl -L "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh" -o AutoTrace_update.sh && chmod 777 AutoTrace_update.sh
-    downloaded_version=$(sed -n '7s/sh_ver="\(.*\)"/\1/p' AutoTrace_update.sh)
+    downloaded_version=$(sed -n '22s/sh_ver="\(.*\)"/\1/p' AutoTrace_update.sh)
+    echo -e "本地脚本版本为：${running_version} "
+    echo -e "最新脚本版本为：${downloaded_version} "
     if [ "$running_version" != "$downloaded_version" ]; then
-        echo -e "更新脚本从 ${ver} 到 ${downloaded_version}"
+        echo -e "更新脚本从 ${sh_ver} 到 ${downloaded_version}"
         mv AutoTrace_update.sh "$0"
         ./AutoTrace.sh
     else
