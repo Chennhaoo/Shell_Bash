@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2024.10.31_02"
+sh_ver="2024.10.31_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -147,7 +147,7 @@ checkver() {
         mv AutoTrace_update.sh "$0"
         ./AutoTrace.sh
     else
-        echo -e "${Info} 本脚本已是最新，脚本无需更新！"
+        echo -e "${Info} 本脚本已是最新，脚本无需更新 ！"
         rm -rf AutoTrace_update.sh*
     fi
     sleep 2s
@@ -1214,6 +1214,7 @@ Specify_IP_AutoTrace(){
 
 
 #脚本运行区
+echo -e "${Info} 脚本正在初始化，请稍等 ！"
 check_sys
 IP_Check
 check_root
