@@ -5,13 +5,13 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2024.10.30_02
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
 #         https://github.com/fscarmen/tools/blob/main/return.sh
 #         https://github.com/masonr/yet-another-bench-script/blob/master/yabs.sh
 #         https://github.com/sjlleo/nexttrace/blob/main/README_zh_CN.md
+#         https://github.com/spiritLHLS/ecs
 #
 #	Blog: https://github.com/Chennhaoo
 #
@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2024.10.30_02"
+sh_ver="2024.10.30_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
