@@ -5,7 +5,7 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: 三网回程路由详细测试
-#	Version: 2024.05.26_01
+#	Version: 2024.10.30_02
 #	Author: ChennHaoo
 #   参考：https://github.com/zq/shell/blob/master/autoBestTrace.sh  
 #         https://github.com/fscarmen/warp_unlock
@@ -19,6 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
+sh_ver="2024.10.30_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -29,7 +30,7 @@ log="${file}/AutoTrace_Mtr.log"
 true > $log
 rep_time=$( date -R )
 
-Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
+Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Yellow_font_prefix="\033[33m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
 Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
@@ -120,6 +121,33 @@ check_sys(){
 		 	echo -e "${Error} 无法判断您的系统 " && exit 1	
 		fi
 	fi    
+}
+
+#使用计数
+statistics_of_run-times() {
+    COUNT=$(
+        curl -4 -ksm1 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FChennhaoo%2FShell_Bash&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false" 2>&1 ||
+            curl -6 -ksm1 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FChennhaoo%2FShell_Bash&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false" 2>&1
+    )
+    #当天
+    TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
+    #累计
+    TOTAL=$(expr "$COUNT" : '.*/\s\([0-9]\{1,\}\)\s.*')
+}
+
+#脚本版本更新
+checkver() {
+    running_version=$(sed -n '7s/sh_ver="\(.*\)"/\1/p' "$0")
+    curl -L "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh" -o AutoTrace_update.sh && chmod 777 AutoTrace_update.sh
+    downloaded_version=$(sed -n '7s/sh_ver="\(.*\)"/\1/p' AutoTrace_update.sh)
+    if [ "$running_version" != "$downloaded_version" ]; then
+        echo -e "更新脚本从 ${ver} 到 ${downloaded_version}"
+        mv AutoTrace_update.sh "$0"
+        ./AutoTrace.sh
+    else
+        echo -e "本脚本已是最新脚本无需更新"
+        rm -rf AutoTrace_update.sh*
+    fi
 }
 
 #检测IPv4、IPv6状态
@@ -398,11 +426,11 @@ NT_IPv4_IP_CN_Mtr(){
     fi     
     #删除之前的日志及执行文件 
     AutoTrace_Start
-    #下载BestTrace主程序
+    #下载Nexttrace主程序
     Nexttrace_Ver
     #载入IPv4库     
     IPv4_IP
-    #载入BestTrace参数
+    #载入Nexttrace参数
     Nexttrace_Mode
     #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改
     clear    
@@ -444,11 +472,11 @@ NT_IPv4_IP_EN_Mtr(){
     fi     
     #删除之前的日志及执行文件 
     AutoTrace_Start
-    #下载BestTrace主程序
+    #下载Nexttrace主程序
     Nexttrace_Ver
     #载入IPv4库     
     IPv4_IP
-    #载入BestTrace参数
+    #载入Nexttrace参数
     Nexttrace_Mode
     #开始测试IPv4库回程路由，第5个块是表示节点序号的，增删节点都要修改
     clear    
@@ -467,34 +495,34 @@ NT_IPv4_IP_EN_Mtr(){
     Nexttrace_Dle       
 }
 
-#IP v4 库
+#IP v4 库（可以是IP，也可以是域名）
 IPv4_IP(){
     #电信
-    IPv4_1="59.36.216.1"
-    IPv4_1_name="中国 深圳 电信"
+    IPv4_1="gd-ct-v4.ip.zstaticcdn.com:80"
+    IPv4_1_name="中国 广东 电信"
     
-    IPv4_2="101.226.41.65"
+    IPv4_2="sh-ct-v4.ip.zstaticcdn.com:80"
     IPv4_2_name="中国 上海 电信"
     
-    IPv4_3="220.181.53.1"
+    IPv4_3="bj-ct-v4.ip.zstaticcdn.com:80"
     IPv4_3_name="中国 北京 电信"   
     #联通
-    IPv4_4="210.21.4.130"
-    IPv4_4_name="中国 广州 联通"
+    IPv4_4="gd-cu-v4.ip.zstaticcdn.com:80"
+    IPv4_4_name="中国 广东 联通"
     
-    IPv4_5="112.65.95.129"
+    IPv4_5="sh-cu-v4.ip.zstaticcdn.com:80"
     IPv4_5_name="中国 上海 联通"
     
-    IPv4_6="61.49.140.217"
+    IPv4_6="bj-cu-v4.ip.zstaticcdn.com:80"
     IPv4_6_name="中国 北京 联通"
     #移动
-    IPv4_7="120.233.53.1"
-    IPv4_7_name="中国 深圳 移动"
+    IPv4_7="gd-cm-v4.ip.zstaticcdn.com:80"
+    IPv4_7_name="中国 广东 移动"
     
-    IPv4_8="183.194.216.129"
+    IPv4_8="sh-cm-v4.ip.zstaticcdn.com:80"
     IPv4_8_name="中国 上海 移动"
     
-    IPv4_9="211.136.25.153"
+    IPv4_9="bj-cm-v4.ip.zstaticcdn.com:80"
     IPv4_9_name="中国 北京 移动"
 }
 
@@ -521,11 +549,11 @@ NT_IPv6_IP_CN_Mtr(){
     fi     
     #删除之前的日志及执行文件 
     AutoTrace_Start
-    #下载BestTrace主程序
+    #下载Nexttrace主程序
     Nexttrace_Ver
     #载入IPv4库     
     IPv6_IP
-    #载入BestTrace参数
+    #载入Nexttrace参数
     Nexttrace_Mode
     #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改
     clear    
@@ -567,11 +595,11 @@ NT_IPv6_IP_EN_Mtr(){
     fi     
     #删除之前的日志及执行文件 
     AutoTrace_Start
-    #下载BestTrace主程序
+    #下载Nexttrace主程序
     Nexttrace_Ver
     #载入IPv4库     
     IPv6_IP
-    #载入BestTrace参数
+    #载入Nexttrace参数
     Nexttrace_Mode
     #开始测试IPv6库回程路由，第5个块是表示节点序号的，增删节点都要修改
     clear  
@@ -590,37 +618,37 @@ NT_IPv6_IP_EN_Mtr(){
     Nexttrace_Dle  
 }
 
-#IP v6 库
+#IP v6 库（可以是IP，也可以是域名）
 IPv6_IP(){
     #电信
-    IPv6_1="240e:904:800:1480::1"
+    IPv6_1="bj-ct-v6.ip.zstaticcdn.com:80"
     IPv6_1_name="中国 北京 电信"
     
-    IPv6_2="240e:96c:200:5500:8000::1"
+    IPv6_2="sh-ct-v6.ip.zstaticcdn.com:80"
     IPv6_2_name="中国 上海 电信"
     
-    IPv6_3="240e:97c:4040:8ff::1"
-    IPv6_3_name="中国 深圳 电信" 
+    IPv6_3="gd-ct-v6.ip.zstaticcdn.com:80"
+    IPv6_3_name="中国 广东 电信" 
 
     #联通
-    IPv6_4="2408:8706:0:dd80::1"
+    IPv6_4="bj-cu-v6.ip.zstaticcdn.com:80"
     IPv6_4_name="中国 北京 联通" 
 
-    IPv6_5="2408:870c:1000:5:8000::1"
+    IPv6_5="sh-cu-v6.ip.zstaticcdn.com:80"
     IPv6_5_name="中国 上海 联通"   
 
-    IPv6_6="2408:8756:dcff:e001:8000::1"
-    IPv6_6_name="中国 广东潮州 联通" 
+    IPv6_6="gd-cu-v6.ip.zstaticcdn.com:80"
+    IPv6_6_name="中国 广东 联通" 
     
     #移动
-    IPv6_7="2409:8c00:7821:1a:8000::1"
+    IPv6_7="bj-cm-v6.ip.zstaticcdn.com:80"
     IPv6_7_name="中国 北京 移动" 
 
-    IPv6_8="2409:8c1e:8fc0:f000:8000::1"
+    IPv6_8="sh-cm-v6.ip.zstaticcdn.com:80"
     IPv6_8_name="中国 上海 移动"   
 
-    IPv6_9="2409:8c54:1000:6:8000::1"
-    IPv6_9_name="中国 深圳 移动"     
+    IPv6_9="gd-cm-v6.ip.zstaticcdn.com:80"
+    IPv6_9_name="中国 广东 移动"    
 }
 
 
@@ -1116,8 +1144,10 @@ NT_Specify_IPv6_EN_Mtr(){
 #启动菜单区===============================================
 #脚本不加参数时的启动菜单
 Stand_AutoTrace(){
-echo -e " 服务器信息（优先显示IPv4，仅供参考）：
-————————————————————————————————————
+echo -e " -- AutoTrace 三网回程测试脚本 ${Green_font_prefix}[v${sh_ver}]${Font_color_suffix}  当天运行：$TODAY 次 / 累计运行：$TOTAL 次 --
+
+服务器信息（优先显示IPv4，仅供参考）：
+—————————————————————————————————————————————————————————————————————
  ISP      : $ISP_Print
  ASN      : $ASN_Print
  服务商   : $Host_Print
@@ -1128,16 +1158,15 @@ echo -e " 服务器信息（优先显示IPv4，仅供参考）：
  IP 性质  : $TYPE_Print
  IP 危险性: $FRAUD_SCORE/100（建议小于60分，分数越高说明 IP 可能存在滥用欺诈行为）
 
- 测试项（TCP Mode，三网回程测试点均为 9 个）：
-————————————————————————————————————
- 1. 本机 IPv4 三网回程路由 中文 输出 Nexttrace 库（默认）
+ 测试项（TCP Mode，三网回程测试点均为 9 个，包含广东、上海、北京）：
+—————————————————————————————————————————————————————————————————————
+ ${Yellow_font_prefix}1. 本机 IPv4 三网回程路由 中文 输出 Nexttrace 库（默认）${Font_color_suffix} 
  2. 本机 IPv4 三网回程路由 英文 输出 Nexttrace 库
- 3. 本机 IPv6 三网回程路由 中文 输出 Nexttrace 库
+ ${Yellow_font_prefix}3. 本机 IPv6 三网回程路由 中文 输出 Nexttrace 库${Font_color_suffix} 
  4. 本机 IPv6 三网回程路由 英文 输出 Nexttrace 库
- 5. 本机到指定 IPv4/IPv6 路由（Nexttrace）
+ ${Yellow_font_prefix}5. 本机到指定 IPv4/IPv6 路由 Nexttrace库${Font_color_suffix} 
  6. 退出测试
 
-${Green_font_prefix} 注意：因 BestTrace 开始收费，现全部使用 Nexttrace 库。${Font_color_suffix}
     " 
     read -e -p " 请输入需要的测试项 [1-6] ( 默认：1 ）：" Stand_AutoTrace_num
     [[ -z "${Stand_AutoTrace_num}" ]] && Stand_AutoTrace_num="1"
@@ -1162,7 +1191,7 @@ ${Green_font_prefix} 注意：因 BestTrace 开始收费，现全部使用 Nextt
         sleep 4s
         NT_IPv6_IP_EN_Mtr 
     elif [[ ${Stand_AutoTrace_num} == "5" ]]; then 
-        echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由（Nexttrace），即将开始测试!  Ctrl+C 取消！
+        echo -e "${Info} 您选择的是：本机到指定 IPv4/IPv6 路由 Nexttrace库，即将开始测试!  Ctrl+C 取消！
         "
         sleep 3s
         Specify_IP
@@ -1185,6 +1214,8 @@ Specify_IP_AutoTrace(){
 check_sys
 IP_Check
 check_root
+statistics_of_run-times
+checkver
 clear 
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 
