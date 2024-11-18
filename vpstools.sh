@@ -10,12 +10,11 @@ export PATH
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2024.11.18_01"
+sh_ver="2024.11.18_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
 SSH_file="${file}/ssh_port.sh"
-BH_file="${file}/bench.sh"
 ECS_file="${file}/ecs.sh"
 AutoTrace_file="${file}/AutoTrace.sh"
 BT_Panel="/www/server/panel"
@@ -95,7 +94,7 @@ Os_Ver(){
 input_BL(){
 	#显示当前系统版本
 	VPS_Virt
-	OS_input="${Os_Full}_${bit}_${virt}"
+	OS_input="$(Os_Full)_${bit}_${virt}"
 
 	#安装curl
 	if  [[ "$(command -v curl)" == "" ]]; then
@@ -202,19 +201,7 @@ Debian_apt(){
 
 #更新系统时间
 SYS_Time(){
-	echo -e "${Info} 开始配置时区为上海时间...."
-	if [ -f /etc/localtime ]; then
-		if cat /etc/localtime | grep -Eqi "CST-8"; then
-			echo -e "${Info} 已是上海时区...."
-		else
-			\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-			echo -e "${Info} 时区错误，已修改为上海时区...."
-		fi
-	else
-		\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-		echo -e "${Info} 时区文件不存在，已配置为上海时区...."
-	fi
-	echo -e "${Info} 复核时区 "
+	#安装软件
 	if  [[ "$(command -v ntpdate)" == "" ]]; then
 		echo -e "${Info} 开始安装 ntpdate ...."
 		if [[ ${release} == "centos" ]]; then
@@ -226,7 +213,30 @@ SYS_Time(){
 		else
 		 	echo -e "${Error} 无法判断您的系统 " && exit 1	
 		fi
+	fi	
+	#修改时区
+	echo -e "${Info} 开始配置时区为上海时间...."
+	if [ -f /etc/localtime ]; then
+		if cat /etc/localtime | grep -Eqi "CST-8"; then
+			echo -e "${Info} 已是上海时区...."
+		else
+			\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+			echo -e "${Info} 时区错误，已修改为上海时区...."
+			#复核时区
+			if [[ ${release} == "centos" ]]; then
+				tzselect
+			elif [[ ${release} == "debian" ]]; then	
+				dpkg-reconfigure tzdata
+			elif [[ ${release} == "ubuntu" ]]; then	
+				dpkg-reconfigure tzdata	
+			else
+				echo -e "${Error} 无法判断您的系统 " && exit 1	
+			fi	
+		fi
 	else
+		\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+		echo -e "${Info} 时区文件不存在，已配置为上海时区...."
+		#复核时区
 		if [[ ${release} == "centos" ]]; then
 			tzselect
 		elif [[ ${release} == "debian" ]]; then	
@@ -234,7 +244,7 @@ SYS_Time(){
 		elif [[ ${release} == "ubuntu" ]]; then	
 			dpkg-reconfigure tzdata	
 		else
-		 	echo -e "${Error} 无法判断您的系统 " && exit 1	
+			echo -e "${Error} 无法判断您的系统 " && exit 1	
 		fi	
 	fi
 	echo -e "${Info} 开始同步系统时间...."
@@ -302,6 +312,7 @@ Update_SYS_Yuan(){
 
 #修改当前用户密码
 PASSWORD(){
+	clear
 echo -e "
  ${Info} 请在下方输入新的密码，密码不会显示，需输入两遍，输入完毕后回车确认！
  如不想修改，请使用 Ctrl+C 取消！或第一次直接回车，第二次随便输入后再回车，两次密码不一样也会取消修改。
@@ -312,10 +323,11 @@ echo -e "
 
 #修改Hostname 代码来自：https://www.nodeseek.com/post-189290-1
 SYS_Hostname(){
+	clear
 	CURRENT_HOSTNAME=`hostname`
-	echo -e "当前Hostname: ${CURRENT_HOSTNAME}"
-	read -e -p "请输入新的Hostname：" NEW_HOSTNAME
-	echo "确定要将 Hostname 更新为 ${NEW_HOSTNAME} 吗 ？[y/N]" && echo
+	echo -e "当前 Hostname: ${CURRENT_HOSTNAME}"
+	read -e -p "请输入新的 Hostname：" NEW_HOSTNAME
+	echo -e "确定要将 Hostname 更新为${Red_font_prefix} ${NEW_HOSTNAME} ${Font_color_suffix}吗 ？[y/N]" && echo
 	stty erase '^H' && read -p "(默认: y):" unyn
 	if [[ ${unyn} == [Nn] ]]; then
 		echo -e "${Info} 已取消..." && exit 1
@@ -327,10 +339,9 @@ SYS_Hostname(){
     	sed -i "s/::1\s.*$/::1\t${NEW_HOSTNAME}/" /etc/hosts
 		#使用 hostnamectl 设置主机名
 		hostnamectl set-hostname "${NEW_HOSTNAME}"
-		echo -e "当前Hostname已更新为: ${hostname}"
+		echo -e "当前 Hostname 已更新为:${Red_font_prefix} $(hostname) ${Font_color_suffix}，可使用 hostname 命令确认，重启后生效。"
 	fi
 }
-
 
 
 
@@ -639,37 +650,15 @@ Install_SSHPor(){
 #独服硬盘时间检测
 DF_Test(){
 	cd "${file}"
+	clear
+	echo -e "${Info} 脚本初始化中 !"
 	bash <(wget -qO- git.io/ceshi)
 }
-
-#Bench测试
-Install_BH(){
-	if [[ -e ${BH_file} ]]; then
-		rm -rf "${BH_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	else	
-		echo -e "${Error} 没有发现 Bench 测试脚本，开始下载..."
-	fi
-	cd "${file}"
-	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/teddysun/across/master/bench.sh; then
-		echo -e "${Error} Bench 测试脚本下载失败 !" && exit 1
-	else
-		echo -e "${Info} Bench 测试脚本下载完成 !"
-		chmod +x bench.sh
-	fi
-	bash "${BH_file}"
-	#测试完毕后删除脚本
-	rm -rf "${BH_file}"
-	if [[ -e ${BH_file} ]]; then
-		echo -e "${Error} 删除脚本失败，请手动删除 ${BH_file}"
-	else	
-		echo -e "${Info} 已删除脚本"
-	fi
-}
-
 
 #Yabs 测试(跑分)
 Install_YB(){
 	cd "${file}"
+	clear
 echo -e " 请选择 Yabs 需要的测试项 
 ————————————————————————————————————
 ${Green_font_prefix} 1. ${Font_color_suffix}基本信息+磁盘性能+国际网速+Geekbench 5 跑分（默认）
@@ -752,6 +741,7 @@ ${Green_font_prefix} 10. ${Font_color_suffix}取消测试
 #融合怪测试
 Ecs_Bench(){
 	cd "${file}"
+	clear
 	if [[ -e ${ECS_file} ]]; then
 		chmod +x "${ECS_file}"
 		bash "${ECS_file}"		
@@ -783,12 +773,16 @@ Ecs_Bench(){
 #流媒体解锁检测
 Install_LMT(){
 	cd "${file}"
+	clear
+	echo -e "${Info} 脚本初始化中 !"
 	bash <(curl -sSL https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh)
 }
 
 #IP质量检测&解锁检测
 IP_Check(){
 	cd "${file}"
+	clear
+	echo -e "${Info} 脚本初始化中 !"
 	bash <(curl -sL IP.Check.Place)
 }
 
@@ -832,6 +826,7 @@ echo -e "${Info} 脚本正在初始化，请稍等 ！"
 check_sys
 check_root
 checkver
+sleep 2s
 input_BL
 clear
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
@@ -843,7 +838,7 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 3.${Font_color_suffix} 更新系统及软件（慎重）
  ${Green_font_prefix} 4.${Font_color_suffix} 修改系统时间为上海时间
  ${Green_font_prefix} 5.${Font_color_suffix} 修改当前用户登录密码 
- ${Green_font_prefix} 6.${Font_color_suffix} 修改Hostname 
+ ${Green_font_prefix} 6.${Font_color_suffix} 修改 Hostname 
 ————————————
  ${Green_font_prefix} 7.${Font_color_suffix} 配置 KVM BBR
  ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔 7.7 面板（修改版，不强制绑定）
@@ -851,18 +846,17 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 10.${Font_color_suffix} 修改 SSH 端口（宝塔用户请在面板中修改/Centos无法使用）
 ————————————
  ${Green_font_prefix} 11.${Font_color_suffix} 独服硬盘时间检测
- ${Green_font_prefix} 12.${Font_color_suffix} Bench 测试
- ${Green_font_prefix} 13.${Font_color_suffix} Yabs 测试（GB跑分）
- ${Green_font_prefix} 14.${Font_color_suffix} 融合怪脚本测试（全能）
- ${Green_font_prefix} 15.${Font_color_suffix} 流媒体解锁检测（全面）
- ${Green_font_prefix} 16.${Font_color_suffix} IP质量检测&软件解锁检测
- ${Green_font_prefix} 17.${Font_color_suffix} 三网回程路由
+ ${Green_font_prefix} 12.${Font_color_suffix} Yabs 测试（GB跑分）
+ ${Green_font_prefix} 13.${Font_color_suffix} 融合怪脚本测试（全能）
+ ${Green_font_prefix} 14.${Font_color_suffix} 流媒体解锁检测（全面）
+ ${Green_font_prefix} 15.${Font_color_suffix} IP质量检测&软件解锁检测
+ ${Green_font_prefix} 16.${Font_color_suffix} 三网回程路由
 
  ${Info} 当前操作系统：${Red_font_prefix}$OS_input${Font_color_suffix}
  ${Info} 当前系统内核：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
  ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
-read -e -p " 请输入数字 [1-17]:" num
+read -e -p " 请输入数字 [1-16]:" num
 case "$num" in
 	1)
 	SYS_Tools
@@ -898,24 +892,21 @@ case "$num" in
 	DF_Test
 	;;
 	12)
-	Install_BH
-	;;
-	13)
 	Install_YB
 	;;
-	14)
+	13)
 	Ecs_Bench
 	;;
-	15)
+	14)
 	Install_LMT
 	;;
-	16)
+	15)
 	IP_Check
 	;;
-	17)
+	16)
 	LY_AutoTrace
 	;;
 	*)
-	echo "请输入正确数字 [1-17]"
+	echo "请输入正确数字 [1-16]"
 	;;
 esac
