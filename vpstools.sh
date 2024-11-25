@@ -9,7 +9,7 @@ export PATH
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2024.11.25_01"
+sh_ver="2024.11.25_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -140,9 +140,9 @@ VPS_Virt(){
 
 #脚本版本更新
 checkver() {
-    running_version=$(sed -n '13s/sh_ver="\(.*\)"/\1/p' "$0")
+    running_version=$(sed -n '12s/sh_ver="\(.*\)"/\1/p' "$0")
     curl -L "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/refs/heads/master/vpstools.sh" -o vpstools_update.sh && chmod 777 vpstools_update.sh
-    downloaded_version=$(sed -n '13s/sh_ver="\(.*\)"/\1/p' vpstools_update.sh)
+    downloaded_version=$(sed -n '12s/sh_ver="\(.*\)"/\1/p' vpstools_update.sh)
     echo -e "${Info} 本地脚本版本为：${running_version} "
     echo -e "${Info} 最新脚本版本为：${downloaded_version} "
     if [ "$running_version" != "$downloaded_version" ]; then
