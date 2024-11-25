@@ -5,12 +5,11 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: VPS Tools
-#	Version: 2024.10.05_01
 #	Author: ChennHaoo
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2024.11.18_02"
+sh_ver="2024.11.25_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -30,7 +29,7 @@ check_root(){
 	[[ $EUID != 0 ]] && echo -e "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作，请更换ROOT账号或使用 ${Green_background_prefix}sudo su${Font_color_suffix} 命令获取临时ROOT权限（执行后可能会提示输入当前账号的密码）。" && exit 1
 }
 
-#检查系统
+#检查系统以及一些必须得环境配置
 check_sys(){
 	if [[ -f /etc/redhat-release ]]; then
 		release="centos"	
@@ -75,6 +74,22 @@ check_sys(){
 		# 未知内核 
 		echo -e "${Error} 无法受支持的系统 !" && exit 1
 	fi
+
+	#安装curl
+	if  [[ "$(command -v curl)" == "" ]]; then
+		echo " 开始安装 curl..."
+		Update_SYS_Yuan
+		if [[ ${release} == "centos" ]]; then
+			yum install curl -y
+		else
+			apt-get install curl -y
+		fi
+	fi
+	
+	#变量带入区，用于某些变量转换为文本输出或者需要提前安装的软件
+	#显示当前系统版本
+	VPS_Virt
+	OS_input="$(Os_Full)_${bit}_${virt}"	
 }
 
 #获取操作系统全版本号
@@ -88,24 +103,6 @@ Os_Full(){
 Os_Ver(){
     local main_ver="$( echo $(Os_Full) | grep -oE  "[0-9.]+")"
     printf -- "%s" "${main_ver%%.*}"
-}
-
-#变量带入区，用于某些变量转换为文本输出或者需要提前安装的软件
-input_BL(){
-	#显示当前系统版本
-	VPS_Virt
-	OS_input="$(Os_Full)_${bit}_${virt}"
-
-	#安装curl
-	if  [[ "$(command -v curl)" == "" ]]; then
-		echo " 开始安装 curl..."
-		Update_SYS_Yuan
-		if [[ ${release} == "centos" ]]; then
-			yum install curl -y
-		else
-			apt-get install curl -y
-		fi
-	fi
 }
 
 #检查VPS虚拟状态，{	if [ -n "${virt}" -a "${virt}" = "kvm" ]; then;}判断
@@ -825,9 +822,9 @@ clear
 echo -e "${Info} 脚本正在初始化，请稍等 ！"
 check_sys
 check_root
+clear
 checkver
 sleep 2s
-input_BL
 clear
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
 echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
