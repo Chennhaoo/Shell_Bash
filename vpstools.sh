@@ -9,7 +9,7 @@ export PATH
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2024.11.25_02"
+sh_ver="2025.02.25_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -88,8 +88,12 @@ check_sys(){
 	
 	#变量带入区，用于某些变量转换为文本输出或者需要提前安装的软件
 	#显示当前系统版本
-	VPS_Virt
-	OS_input="$(Os_Full)_${bit}_${virt}"	
+	VIRT=$(systemd-detect-virt)
+	VIRT=${VIRT^^} || VIRT="UNKNOWN"
+	OS_input="$(Os_Full)_${bit}_${VIRT}"
+
+	#开机时间
+	OPEN_UPTIME=$(uptime | awk -F'( |,|:)+' '{d=h=m=0; if ($7=="min") m=$6; else {if ($7~/^day/) {d=$6;h=$8;m=$9} else {h=$6;m=$7}}} {print d+0,"days,",h+0,"hours,",m+0,"minutes"}')
 }
 
 #获取操作系统全版本号
@@ -849,8 +853,8 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 15.${Font_color_suffix} IP质量检测&软件解锁检测
  ${Green_font_prefix} 16.${Font_color_suffix} 三网回程路由
 
- ${Info} 当前操作系统：${Red_font_prefix}$OS_input${Font_color_suffix}
- ${Info} 当前系统内核：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
+ ${Info} 当前系统：${Red_font_prefix}$OS_input $Kern_Ver${Font_color_suffix}
+ ${Info} 开机时间：${Red_font_prefix}$OPEN_UPTIME${Font_color_suffix}
  ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
 read -e -p " 请输入数字 [1-16]:" num
