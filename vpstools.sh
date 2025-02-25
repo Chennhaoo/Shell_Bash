@@ -9,7 +9,7 @@ export PATH
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2025.02.25_01"
+sh_ver="2025.02.25_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BBR_file="${file}/bbr_CH.sh"
@@ -853,7 +853,7 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 15.${Font_color_suffix} IP质量检测&软件解锁检测
  ${Green_font_prefix} 16.${Font_color_suffix} 三网回程路由
 
- ${Info} 当前系统：${Red_font_prefix}$OS_input $Kern_Ver${Font_color_suffix}
+ ${Info} 系统：${Red_font_prefix}$OS_input${Font_color_suffix} / 内核：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
  ${Info} 开机时间：${Red_font_prefix}$OPEN_UPTIME${Font_color_suffix}
  ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
