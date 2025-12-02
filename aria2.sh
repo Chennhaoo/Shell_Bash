@@ -8,7 +8,7 @@ export PATH
 #	Author: Toyo
 #	Blog: https://doub.io/shell-jc4/
 #=================================================
-sh_ver="2025.12.02-2"
+sh_ver="2025.12.02-3"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file_1=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 file="/root/.aria2"
@@ -122,8 +122,11 @@ Download_aria2(){
 	[[ ! -e "${Folder}" ]] && echo -e "${Error} Aria2 文件夹重命名失败 !" && rm -rf "${Aria2_Name}.tar.gz" && rm -rf "/usr/local/${Aria2_Name}" && exit 1
 	rm -rf "${Aria2_Name}.tar.gz"
 	cd "${Folder}"
-	make install
+	cp aria2c /usr/bin/
+	rm -rf "${Folder}"
+	#make install
 	[[ ! -e ${aria2c} ]] && echo -e "${Error} Aria2 主程序安装失败！" && rm -rf "${Folder}" && exit 1
+	cd /usr/bin/
 	chmod +x aria2c
 	echo -e "${Info} Aria2 主程序安装完毕！开始下载配置文件..."
 }
@@ -156,11 +159,12 @@ Service_aria2(){
 Installation_dependency(){
 	if [[ ${release} = "centos" ]]; then
 		yum update
-		yum -y groupinstall "Development Tools"
+		#yum -y groupinstall "Development Tools"
 		yum install nano -y
 	else
 		apt-get update
-		apt-get install nano build-essential -y
+		#apt-get install nano build-essential -y
+		apt-get install nano -y
 	fi
 }
 Install_aria2(){
