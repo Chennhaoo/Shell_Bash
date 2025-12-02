@@ -8,7 +8,7 @@ export PATH
 #	Author: Toyo
 #	Blog: https://doub.io/shell-jc4/
 #=================================================
-sh_ver="2025.12.02-1"
+sh_ver="2025.12.02-2"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file_1=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 file="/root/.aria2"
@@ -115,7 +115,7 @@ Download_aria2(){
 	Aria2_Name="aria2-${aria2_new_ver}-linux-gnu-${bit}-build1"
 	
 	[[ ! -s "${Aria2_Name}.tar.gz" ]] && echo -e "${Error} Aria2 压缩包下载失败 !" && exit 1
-	tar jxvf "${Aria2_Name}.tar.gz"
+	tar -xzvf "${Aria2_Name}.tar.gz"
 	[[ ! -e "/usr/local/${Aria2_Name}" ]] && echo -e "${Error} Aria2 解压失败 !" && rm -rf "${Aria2_Name}.tar.gz" && exit 1
 	[[ ${update_dl} = "update" ]] && rm -rf "${Folder}"
 	mv "/usr/local/${Aria2_Name}" "${Folder}"
