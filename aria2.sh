@@ -5,11 +5,10 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: Aria2
-#	Version: 1.1.10
 #	Author: Toyo
 #	Blog: https://doub.io/shell-jc4/
 #=================================================
-sh_ver="1.1.10"
+sh_ver="2025.12.02-1"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file_1=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 file="/root/.aria2"
@@ -69,13 +68,13 @@ check_pid(){
 	PID=`ps -ef| grep "aria2c"| grep -v grep| grep -v "aria2.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}'`
 }
 check_new_ver(){
-	echo -e "${Info} 请输入 Aria2 版本号，格式如：[ 1.34.0 ]，获取地址：[ https://github.com/q3aql/aria2-static-builds/releases ]"
+	echo -e "${Info} 请输入 Aria2 版本号，格式如：[ 1.37.0 ]，获取地址：[ https://github.com/Chennhaoo/Aria2-Pro-Core/releases ]"
 	read -e -p "默认回车自动获取最新版本号:" aria2_new_ver
 	if [[ -z ${aria2_new_ver} ]]; then
-		aria2_new_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/q3aql/aria2-static-builds/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+		aria2_new_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/Chennhaoo/Aria2-Pro-Core/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
 		if [[ -z ${aria2_new_ver} ]]; then
-			echo -e "${Error} Aria2 最新版本获取失败，请手动获取最新版本号[ https://github.com/q3aql/aria2-static-builds/releases ]"
-			read -e -p "请输入版本号 [ 格式如 1.34.0 ] :" aria2_new_ver
+			echo -e "${Error} Aria2 最新版本获取失败，请手动获取最新版本号[ https://github.com/Chennhaoo/Aria2-Pro-Core/releases ]"
+			read -e -p "请输入版本号 [ 格式如 1.37.0 ] :" aria2_new_ver
 			[[ -z "${aria2_new_ver}" ]] && echo "取消..." && exit 1
 		else
 			echo -e "${Info} 检测到 Aria2 最新版本为 [ ${aria2_new_ver} ]"
@@ -112,16 +111,16 @@ Download_aria2(){
 	else
 		bit="arm-rbpi"
 	fi
-	wget -N --no-check-certificate "https://github.com/q3aql/aria2-static-builds/releases/download/v${aria2_new_ver}/aria2-${aria2_new_ver}-linux-gnu-${bit}-build1.tar.bz2"
+	wget -N --no-check-certificate "https://github.com/Chennhaoo/Aria2-Pro-Core/releases/download/v${aria2_new_ver}/aria2-${aria2_new_ver}-linux-gnu-${bit}-build1.tar.gz"
 	Aria2_Name="aria2-${aria2_new_ver}-linux-gnu-${bit}-build1"
 	
-	[[ ! -s "${Aria2_Name}.tar.bz2" ]] && echo -e "${Error} Aria2 压缩包下载失败 !" && exit 1
-	tar jxvf "${Aria2_Name}.tar.bz2"
-	[[ ! -e "/usr/local/${Aria2_Name}" ]] && echo -e "${Error} Aria2 解压失败 !" && rm -rf "${Aria2_Name}.tar.bz2" && exit 1
+	[[ ! -s "${Aria2_Name}.tar.gz" ]] && echo -e "${Error} Aria2 压缩包下载失败 !" && exit 1
+	tar jxvf "${Aria2_Name}.tar.gz"
+	[[ ! -e "/usr/local/${Aria2_Name}" ]] && echo -e "${Error} Aria2 解压失败 !" && rm -rf "${Aria2_Name}.tar.gz" && exit 1
 	[[ ${update_dl} = "update" ]] && rm -rf "${Folder}"
 	mv "/usr/local/${Aria2_Name}" "${Folder}"
-	[[ ! -e "${Folder}" ]] && echo -e "${Error} Aria2 文件夹重命名失败 !" && rm -rf "${Aria2_Name}.tar.bz2" && rm -rf "/usr/local/${Aria2_Name}" && exit 1
-	rm -rf "${Aria2_Name}.tar.bz2"
+	[[ ! -e "${Folder}" ]] && echo -e "${Error} Aria2 文件夹重命名失败 !" && rm -rf "${Aria2_Name}.tar.gz" && rm -rf "/usr/local/${Aria2_Name}" && exit 1
+	rm -rf "${Aria2_Name}.tar.gz"
 	cd "${Folder}"
 	make install
 	[[ ! -e ${aria2c} ]] && echo -e "${Error} Aria2 主程序安装失败！" && rm -rf "${Folder}" && exit 1
@@ -327,8 +326,8 @@ Set_aria2_RPC_dir(){
 		aria2_dir_1=${aria2_dir}
 	fi
 	echo -e "请输入要设置的 Aria2 文件下载位置(旧位置为：${Green_font_prefix}${aria2_dir_1}${Font_color_suffix})"
-	read -e -p "(默认位置: /usr/local/caddy/www/aria2/Download):" aria2_RPC_dir
-	[[ -z "${aria2_RPC_dir}" ]] && aria2_RPC_dir="/usr/local/caddy/www/aria2/Download"
+	read -e -p "(默认位置: /usr/local/aria2_DL):" aria2_RPC_dir
+	[[ -z "${aria2_RPC_dir}" ]] && aria2_RPC_dir="/usr/local/aria2_DL"
 	echo
 	if [[ -d "${aria2_RPC_dir}" ]]; then
 		if [[ "${aria2_dir}" != "${aria2_RPC_dir}" ]]; then
