@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2024.10.31_06"
+sh_ver="2025.12.02_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -126,8 +126,8 @@ check_sys(){
 #使用计数
 statistics_of_run-times() {
     COUNT=$(
-        curl -4 -ksm1 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FChennhaoo%2FShell_Bash&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=&edge_flat=true" 2>&1 ||
-            curl -6 -ksm1 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FChennhaoo%2FShell_Bash&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=&edge_flat=true" 2>&1
+        curl -4 -ksm1 "https://hits.assd276080758.workers.dev/CESU.svg?action=hit&title=hits&title_bg=%23555555&count_bg=%233aebee&edge_flat=false" 2>&1 ||
+            curl -6 -ksm1 "https://hits.assd276080758.workers.dev/CESU.svg?action=hit&title=hits&title_bg=%23555555&count_bg=%233aebee&edge_flat=false" 2>&1
     )
     #当天
     TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
