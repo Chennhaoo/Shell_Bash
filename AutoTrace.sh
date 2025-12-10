@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2025.12.02_01"
+sh_ver="2025.12.10_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -126,13 +126,20 @@ check_sys(){
 #使用计数
 statistics_of_run-times() {
     COUNT=$(
-        curl -4 -ksm1 "https://hits.assd276080758.workers.dev/CESU.svg?action=hit&title=hits&title_bg=%23555555&count_bg=%233aebee&edge_flat=false" 2>&1 ||
-            curl -6 -ksm1 "https://hits.assd276080758.workers.dev/CESU.svg?action=hit&title=hits&title_bg=%23555555&count_bg=%233aebee&edge_flat=false" 2>&1
+        curl -4 -ksm10 "https://hits.assd276080758.workers.dev/CESU?action=hit&title=hits&title_bg=%23555555&count_bg=%233aebee&edge_flat=false" 2>&1 ||
+            curl -6 -ksm10 "https://hits.assd276080758.workers.dev/CESU?action=hit&title=hits&title_bg=%23555555&count_bg=%233aebee&edge_flat=false" 2>&1
     )
-    #当天
-    TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
-    #累计
-    TOTAL=$(expr "$COUNT" : '.*/\s\([0-9]\{1,\}\)\s.*')
+    if [ -z "$COUNT" ]; then
+        TODAY="N/A"
+        TOTAL="N/A"
+    else
+        #当天
+        TODAY=$(echo "$COUNT" | grep -oP '"daily":\s*[0-9]+' | sed 's/"daily":\s*\([0-9]*\)/\1/')
+        #累计
+        TOTAL=$(echo "$COUNT" | grep -oP '"total":\s*[0-9]+' | sed 's/"total":\s*\([0-9]*\)/\1/')
+        [ -z "$TODAY" ] && TODAY="N/A"
+        [ -z "$TOTAL" ] && TOTAL="N/A"
+    fi
 }
 
 #脚本版本更新
@@ -163,12 +170,12 @@ IP_Check(){
     fi
 
     #开始检测IPv4、IPv6前的参数配置
-    #API_NET=("api.ip.sb")
-    API_URL=("api.ip.sb/geoip")
+    #API_URL=("https://api.ip.sb/geoip")
+    API_URL=("http://ip-api.com/json")
     
     #IPv4网络探测
-    IP_4=$(curl -s4m5 -A Mozilla https://$API_URL)
-    WAN_4=$(expr "${IP_4}" : '.*ip\":[ ]*\"\([^"]*\).*')
+    WAN_4=$(echo $(curl -s4 http://ip4.me/api/) | cut -d, -f2)
+    IP_4=$(curl -s4m5 -A Mozilla $API_URL/$WAN_4)
     #如果IPv4不为空，就执行里面的
     if [ -n "$WAN_4" ]; then
       #输出IP的ISP
@@ -197,8 +204,6 @@ IP_Check(){
       -d verbose \
       -H "Key: c97ab9480e282182aeac0408b788fad9e41d3ef5aa12d294b3fe8b50cfeb4edf43351bbe4870b066" \
       -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g;s/v//g')
-      #老代码，已失效
-      #TYPE_4_Temp=$(curl -4m5 -A Mozilla -sSL https://www.abuseipdb.com/check/"${WAN_4}" 2>/dev/null | grep -A2 '<th>Usage Type</th>' | tail -n 1 ) 
         if [[ ${TYPE_4_Temp} == "Data Center/Web Hosting/Transit" ]]; then
             TYPE_4="数据中心"
         elif [[ ${TYPE_4_Temp} == "Fixed Line ISP" ]]; then
@@ -213,16 +218,14 @@ IP_Check(){
             TYPE_4="搜索引擎蜘蛛"
         elif [[ ${TYPE_4_Temp} == "University/College/School" ]]; then
             TYPE_4="教育网"
-#        elif [[ ${TYPE_4_Temp} == "Unknown" ]]; then
-#            TYPE_4="未知 IP 网络类型"
         elif [[ ${TYPE_4_Temp} == "" ]]; then
             TYPE_4="未知 IP 网络类型"             
         fi           
     fi  
 
     #IPv6网络探测
-    IP_6=$(curl -s6m5 -A Mozilla https://$API_URL) &&
-    WAN_6=$(expr "${IP_6}" : '.*ip\":[ ]*\"\([^"]*\).*')
+    WAN_6=$(echo $(curl -s6 http://ip6.me/api/) | cut -d, -f2)
+    IP_6=$(curl -s6m5 -A Mozilla $API_URL/$WAN_6) &&
     #如果IPv6不为空，就执行里面的
     if [ -n "$WAN_6" ]; then
       #输出IP的ISP
@@ -251,8 +254,7 @@ IP_Check(){
       -d verbose \
       -H "Key: c97ab9480e282182aeac0408b788fad9e41d3ef5aa12d294b3fe8b50cfeb4edf43351bbe4870b066" \
       -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g;s/v//g')
-      #老代码，已失效
-      #TYPE_6_Temp=$(curl -6m5 -A Mozilla -sSL https://www.abuseipdb.com/check/"${WAN_6}" 2>/dev/null | grep -A2 '<th>Usage Type</th>' | tail -n 1 ) 
+
       	if [[ ${TYPE_6_Temp} == "Data Center/Web Hosting/Transit" ]]; then
             TYPE_6="数据中心"
         elif [[ ${TYPE_6_Temp} == "Fixed Line ISP" ]]; then
@@ -267,8 +269,6 @@ IP_Check(){
             TYPE_6="搜索引擎蜘蛛"
         elif [[ ${TYPE_6_Temp} == "University/College/School" ]]; then
             TYPE_6="教育网"
-#        elif [[ ${TYPE_6_Temp} == "Unknown" ]]; then
-#            TYPE_6="未知 IP 网络类型" 
         elif [[ ${TYPE_6_Temp} == "" ]]; then
             TYPE_6="未知 IP 网络类型"               
         fi          
