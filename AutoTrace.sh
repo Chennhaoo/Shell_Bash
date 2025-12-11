@@ -19,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2025.12.10_02"
+sh_ver="2025.12.11_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -170,7 +170,6 @@ IP_Check(){
     fi
 
     #开始检测IPv4、IPv6前的参数配置
-    #API_URL=("https://api.ip.sb/geoip")
     API_URL=("http://ip-api.com/json")
     
     #IPv4网络探测
@@ -190,8 +189,8 @@ IP_Check(){
       COUNTRY_4E=$(expr "${IP_4}" : '.*country\":[ ]*\"\([^"]*\).*')
       #输出IP的地址，英文
       City_4E=$(expr "${IP_4}" : '.*city\":[ ]*\"\([^"]*\).*')
-      Region_4E=$(expr "${IP_4}" : '.*region\":[ ]*\"\([^"]*\).*')
-      Region_code_4E=$(expr "${IP_4}" : '.*region_code\":[ ]*\"\([^"]*\).*')
+      Region_4E=$(expr "${IP_4}" : '.*regionName\":[ ]*\"\([^"]*\).*')
+      Region_code_4E=$(expr "${IP_4}" : '.*region\":[ ]*\"\([^"]*\).*')
       Location_4E="$City_4E, $Region_4E ($Region_code_4E)"
       #IP欺诈分数
       FRAUD_SCORE_4=$(curl -m10 -sL -H "Referer: https://scamalytics.com" \
@@ -203,7 +202,7 @@ IP_Check(){
       -d maxAgeInDays=90 \
       -d verbose \
       -H "Key: c97ab9480e282182aeac0408b788fad9e41d3ef5aa12d294b3fe8b50cfeb4edf43351bbe4870b066" \
-      -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g;s/v//g')
+      -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g')
         if [[ ${TYPE_4_Temp} == "Data Center/Web Hosting/Transit" ]]; then
             TYPE_4="数据中心"
         elif [[ ${TYPE_4_Temp} == "Fixed Line ISP" ]]; then
@@ -240,8 +239,8 @@ IP_Check(){
       COUNTRY_6E=$(expr "${IP_6}" : '.*country\":[ ]*\"\([^"]*\).*')
       #输出IP的地址，英文
       City_6E=$(expr "${IP_6}" : '.*city\":[ ]*\"\([^"]*\).*')
-      Region_6E=$(expr "${IP_6}" : '.*region\":[ ]*\"\([^"]*\).*')
-      Region_code_6E=$(expr "${IP_6}" : '.*region_code\":[ ]*\"\([^"]*\).*')
+      Region_6E=$(expr "${IP_6}" : '.*regionName\":[ ]*\"\([^"]*\).*')
+      Region_code_6E=$(expr "${IP_6}" : '.*region\":[ ]*\"\([^"]*\).*')
       Location_6E="$City_6E, $Region_6E ($Region_code_6E)"
       #IP欺诈分数
       FRAUD_SCORE_6=$(curl -m10 -sL -H "Referer: https://scamalytics.com" \
@@ -253,7 +252,7 @@ IP_Check(){
       -d maxAgeInDays=90 \
       -d verbose \
       -H "Key: c97ab9480e282182aeac0408b788fad9e41d3ef5aa12d294b3fe8b50cfeb4edf43351bbe4870b066" \
-      -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g;s/v//g')
+      -H "Accept: application/json" | grep -Po '"usageType": *\K"[^"]*"' | sed "s#\\\##g" | sed 's/"//g')
 
       	if [[ ${TYPE_6_Temp} == "Data Center/Web Hosting/Transit" ]]; then
             TYPE_6="数据中心"
