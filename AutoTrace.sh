@@ -12,7 +12,6 @@ export PATH
 #         https://github.com/masonr/yet-another-bench-script/blob/master/yabs.sh
 #         https://github.com/sjlleo/nexttrace/blob/main/README_zh_CN.md
 #         https://github.com/spiritLHLS/ecs
-#         https://github.com/lwthiker/curl-impersonate
 #
 #	Blog: https://github.com/Chennhaoo
 #
@@ -20,7 +19,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2026.01.14_06"
+sh_ver="2026.01.14_07"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -147,9 +146,9 @@ statistics_of_run-times() {
 
 #脚本版本更新
 checkver() {
-    running_version=$(sed -n '23s/sh_ver="\(.*\)"/\1/p' "$0")
+    running_version=$(sed -n '22s/sh_ver="\(.*\)"/\1/p' "$0")
     curl -L "https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh" -o AutoTrace_update.sh && chmod 777 AutoTrace_update.sh
-    downloaded_version=$(sed -n '23s/sh_ver="\(.*\)"/\1/p' AutoTrace_update.sh)
+    downloaded_version=$(sed -n '22s/sh_ver="\(.*\)"/\1/p' AutoTrace_update.sh)
     echo -e "${Info} 本地脚本版本为：${running_version} "
     echo -e "${Info} 最新脚本版本为：${downloaded_version} "
     if [ "$running_version" != "$downloaded_version" ]; then
