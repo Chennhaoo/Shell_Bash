@@ -12,6 +12,7 @@ export PATH
 #         https://github.com/masonr/yet-another-bench-script/blob/master/yabs.sh
 #         https://github.com/sjlleo/nexttrace/blob/main/README_zh_CN.md
 #         https://github.com/spiritLHLS/ecs
+#         https://github.com/lwthiker/curl-impersonate
 #
 #	Blog: https://github.com/Chennhaoo
 #
@@ -19,13 +20,15 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2025.12.11_01"
+sh_ver="2026.01.14_04"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
 BestTrace_file="${file}/BestTrace/besttrace_IP"
 Nexttrace_dir="${file}/Nexttrace"
 Nexttrace_file="${file}/Nexttrace/nexttrace_IP"
+Curl_impersonate_dir="${file}/Curl_impersonate"
+Curl_impersonate_file="${file}/Curl_impersonate/curl_chrome116"
 log="${file}/AutoTrace_Mtr.log"
 true > $log
 rep_time=$( date -R )
@@ -192,9 +195,25 @@ IP_Check(){
       Region_4E=$(expr "${IP_4}" : '.*regionName\":[ ]*\"\([^"]*\).*')
       Region_code_4E=$(expr "${IP_4}" : '.*region\":[ ]*\"\([^"]*\).*')
       Location_4E="$City_4E, $Region_4E ($Region_code_4E)"
-      #IP欺诈分数
-      FRAUD_SCORE_4=$(curl -m10 -sL -H "Referer: https://scamalytics.com" \
-      "https://scamalytics.com/ip/$WAN_4" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
+      
+      #IP欺诈分数，使用https://github.com/lwthiker/curl-impersonate绕过CF
+      #检测当下目录Curl-impersonate文件夹，如有则删除
+      Curl_impersonate_Dle
+        if [[ ${bit} == "mips" ]]; then
+            FRAUD_SCORE_4="未知"
+        else
+            Curl_impersonate_Ver
+            FRAUD_SCORE_4_TEMP=$(bash ${Curl_impersonate_file} -m10 -sL -H "Referer: https://scamalytics.com" \
+            "https://scamalytics.com/ip/$WAN_4" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
+            if [[ -z "$FRAUD_SCORE_4_TEMP" ]]; then
+                FRAUD_SCORE_4="未知"
+            else
+                FRAUD_SCORE_4="$FRAUD_SCORE_4_TEMP"
+            fi
+        fi
+        #删除Curl-impersonate文件夹
+       Curl_impersonate_Dle
+
       #输出IP的类型：数据中心/家庭宽带/商业宽带/移动流量/内容分发网络/搜索引擎蜘蛛/教育网/未知
       #使用abuseipdb.com的API进行探测，每日1000次请求
       TYPE_4_Temp=$(curl -sG https://api.abuseipdb.com/api/v2/check \
@@ -242,9 +261,25 @@ IP_Check(){
       Region_6E=$(expr "${IP_6}" : '.*regionName\":[ ]*\"\([^"]*\).*')
       Region_code_6E=$(expr "${IP_6}" : '.*region\":[ ]*\"\([^"]*\).*')
       Location_6E="$City_6E, $Region_6E ($Region_code_6E)"
-      #IP欺诈分数
-      FRAUD_SCORE_6=$(curl -m10 -sL -H "Referer: https://scamalytics.com" \
-      "https://scamalytics.com/ip/$WAN_6" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
+
+      #IP欺诈分数，使用https://github.com/lwthiker/curl-impersonate绕过CF
+      #检测当下目录Curl-impersonate文件夹，如有则删除
+      Curl_impersonate_Dle
+        if [[ ${bit} == "mips" ]]; then
+            FRAUD_SCORE_6="未知"
+        else
+            Curl_impersonate_Ver
+            FRAUD_SCORE_6_TEMP=$(bash ${Curl_impersonate_file} -m10 -sL -H "Referer: https://scamalytics.com" \
+            "https://scamalytics.com/ip/$WAN_6" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
+            if [[ -z "$FRAUD_SCORE_6_TEMP" ]]; then
+                FRAUD_SCORE_6="未知"
+            else
+                FRAUD_SCORE_6="$FRAUD_SCORE_6_TEMP"
+            fi
+        fi
+        #删除Curl-impersonate文件夹
+       Curl_impersonate_Dle
+
       #输出IP的类型：数据中心/家庭宽带/商业宽带/移动流量/内容分发网络/搜索引擎蜘蛛/教育网/未知
       #使用abuseipdb.com的API进行探测，每日1000次请求
       TYPE_6_Temp=$(curl -sG https://api.abuseipdb.com/api/v2/check \
@@ -691,6 +726,16 @@ Nexttrace_Dle(){
 	fi  
 }
 
+#当下目录Curl-impersonate主程序文件删除
+Curl_impersonate_Dle(){
+    rm -rf "${Curl_impersonate_dir}"
+	if [[ -e ${Curl_impersonate_dir} ]]; then
+		echo -e "${Error} 删除 Curl-impersonate 文件失败，请手动删除 ${Curl_impersonate_dir}"
+	else	
+		echo -e "${Info} 已删除 Curl-impersonate 文件"
+	fi  
+}
+
 #删除当前目录下的路由路径文件，共用
 Log_Dle(){
     rm -rf "${log}"
@@ -841,7 +886,76 @@ Nexttrace_bit(){
     fi
 }
 
+#Curl-impersonate版本下载
+Curl_impersonate_Ver(){
+    if [[ ${release} == "centos" ]]; then
+        Curl_impersonate_bit
+        echo -e "${Info} CentOS Curl-impersonate 检测已下载 !" | tee -a $log
+    elif [[ ${release} == "debian" ]]; then 
+        Curl_impersonate_bit
+        echo -e "${Info} Debian Curl-impersonate 检测已下载 !" | tee -a $log      
+    elif [[ ${release} == "ubuntu" ]]; then 
+        Curl_impersonate_bit
+        echo -e "${Info} Ubuntu Curl-impersonate 检测已下载 !" | tee -a $log 
+    else
+        echo -e "${Error} 无法受支持的系统 !" && exit 1
+    fi
+}
 
+#Curl-impersonate系统位数版本下载
+Curl_impersonate_bit(){
+    echo -e "${Info} 开始根据系统位数下载 Curl-impersonate !"
+    mkdir "${Curl_impersonate_dir}"
+    echo -e "${Info} 当前目录建立 Curl-impersonate 文件夹 !"
+    #开始配置文件下载
+    if ! wget --no-check-certificate -O ${Curl_impersonate_dir}/curl_chrome116 https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/refs/heads/master/curl-impersonate/curl_chrome116; then
+        echo -e "${Error} Curl-impersonate 配置文件下载失败 !" && exit 1
+    else
+        echo -e "${Info} Curl-impersonate 配置文件下载完成 !" | tee -a $log
+    fi
+    #检查Curl-impersonate配置文件是否存在
+    if [[ -e ${Curl_impersonate_file} ]]; then
+        echo -e "${Info} Curl-impersonate 配置文件已下载 !"
+        chmod +x "${Curl_impersonate_file}"
+    else
+        echo -e "${Error} 未检测到 Curl-impersonate 配置文件，请查看 ${Curl_impersonate_file} 目录文件是否存在!" && exit 1       
+    fi
+    #开始二进制CURL文件下载
+    if [[ ${bit} == "x64" ]]; then 
+        if ! wget --no-check-certificate -O ${Curl_impersonate_dir}/curl-impersonate-chrome https://github.com/Chennhaoo/Shell_Bash/raw/refs/heads/master/curl-impersonate/curl-impersonate-chrome_x86_64-linux; then
+            echo -e "${Error} Curl-impersonate_x64 下载失败 !" && exit 1
+        else
+            echo -e "${Info} Curl-impersonate_x64 下载完成 !" | tee -a $log
+        fi
+    elif [[ ${bit} == "x86" ]]; then
+            if ! wget --no-check-certificate -O ${Curl_impersonate_dir}/curl-impersonate-chrome https://github.com/Chennhaoo/Shell_Bash/raw/refs/heads/master/curl-impersonate/curl-impersonate-chrome_x86_64-linux; then
+            echo -e "${Error} Curl-impersonate_x32 下载失败 !" && exit 1
+        else
+            echo -e "${Info} Curl-impersonate_x32 下载完成 !" | tee -a $log
+        fi 
+    elif [[ ${bit} == "aarch64" ]]; then
+            if ! wget --no-check-certificate -O ${Curl_impersonate_dir}/curl-impersonate-chrome https://github.com/Chennhaoo/Shell_Bash/raw/refs/heads/master/curl-impersonate/curl-impersonate-chrome_aarch64-linux; then
+            echo -e "${Error} Curl-impersonate_ARM_X64 下载失败 !" && exit 1
+        else
+            echo -e "${Info} Curl-impersonate_ARM_X64 下载完成 !" | tee -a $log
+        fi
+    elif [[ ${bit} == "arm" ]]; then
+            if ! wget --no-check-certificate -O ${Curl_impersonate_dir}/curl-impersonate-chrome https://github.com/Chennhaoo/Shell_Bash/blob/master/curl-impersonate/curl-impersonate-chrome_arm-linux; then
+            echo -e "${Error} Curl-impersonate_ARM_X32 下载失败 !" && exit 1
+        else
+            echo -e "${Info} Curl-impersonate_ARM_X32 下载完成 !" | tee -a $log
+        fi
+    else
+        echo -e "${Error} 无法受支持的系统 !" && exit 1
+    fi
+    #检查Curl-impersonate二进制文件是否存在
+    if [[ -e ${Curl_impersonate_dir}/curl-impersonate-chrome ]]; then
+        echo -e "${Info} Curl-impersonate二进制文件已下载 !"
+        chmod +x "${Curl_impersonate_dir}/curl-impersonate-chrome"
+    else
+        echo -e "${Error} 未检测到 Curl-impersonate二进制文件，请查看 ${Curl_impersonate_dir}/curl-impersonate-chrome 目录文件是否存在!" && exit 1       
+    fi
+}
 ###到指定IP路由测试部分    开始========================================================
 
 #到指定IP路由测试 主菜单
