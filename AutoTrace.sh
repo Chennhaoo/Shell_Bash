@@ -20,7 +20,7 @@ export PATH
 #=================================================
 
 #定义参数
-sh_ver="2026.01.14_04"
+sh_ver="2026.01.14_05"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 BestTrace_dir="${file}/BestTrace"
@@ -203,7 +203,7 @@ IP_Check(){
             FRAUD_SCORE_4="未知"
         else
             Curl_impersonate_Ver
-            FRAUD_SCORE_4_TEMP=$(bash ${Curl_impersonate_file} -m10 -sL -H "Referer: https://scamalytics.com" \
+            FRAUD_SCORE_4_TEMP=$(${Curl_impersonate_file} -m10 -sL -H "Referer: https://scamalytics.com" \
             "https://scamalytics.com/ip/$WAN_4" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
             if [[ -z "$FRAUD_SCORE_4_TEMP" ]]; then
                 FRAUD_SCORE_4="未知"
@@ -269,7 +269,7 @@ IP_Check(){
             FRAUD_SCORE_6="未知"
         else
             Curl_impersonate_Ver
-            FRAUD_SCORE_6_TEMP=$(bash ${Curl_impersonate_file} -m10 -sL -H "Referer: https://scamalytics.com" \
+            FRAUD_SCORE_6_TEMP=$(${Curl_impersonate_file} -m10 -sL -H "Referer: https://scamalytics.com" \
             "https://scamalytics.com/ip/$WAN_6" | awk -F : '/Fraud Score/ {gsub(/[^0-9]/,"",$2); print $2}')
             if [[ -z "$FRAUD_SCORE_6_TEMP" ]]; then
                 FRAUD_SCORE_6="未知"
