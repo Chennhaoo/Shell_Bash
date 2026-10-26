@@ -9,7 +9,7 @@ export PATH
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2026.10.27_02"
+sh_ver="2026.10.27_03"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 SSH_file="${file}/ssh_port.sh"
@@ -91,7 +91,7 @@ check_sys(){
 	OS_input="$(Os_Full)_${bit}_${VIRT}"
 
 	#开机时间
-	OPEN_UPTIME=$(awk '{total=int($1); d=int(total/86400); h=int((total%86400)/3600); m=int((total%3600)/60); printf "%d天，%d小时，%d分钟\n", d, h, m}' /proc/uptime)
+	OPEN_UPTIME=$(awk '{total=int($1); d=int(total/86400); h=int((total%86400)/3600); m=int((total%3600)/60); printf "%d天 / %d小时 / %d分钟\n", d, h, m}' /proc/uptime)
 }
 
 #获取操作系统全版本号
@@ -399,8 +399,9 @@ ${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)，请备份重要文件
 2. 本脚本仅支持 KVM 虚拟化系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
 3. 本脚本来自于秋水逸冰，https://github.com/teddysun/across
-4. 系统识别错误请选择取消" && echo
-		echo -e "是否继续安装 [y/N]" && echo
+4. 系统识别错误请选择取消
+———————————————————————————————  
+ 是否继续安装 [y/N]" && echo
 		stty erase '^H' && read -p "(默认: N):" unyn 
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
@@ -420,8 +421,8 @@ ${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 3. 若使用Debian 9、Ubuntu 18.04 等内核版本在${Green_font_prefix} 4.9.0 ${Font_color_suffix}及其之上的，可直接选择开启BBR而不需更换内核
 4. Debian/Ubuntu 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}
 5. 本脚本来自于秋水逸冰，https://github.com/teddysun/across
-6. 系统识别错误请选择取消" && echo		
-echo -e "	
+6. 系统识别错误请选择取消		
+———————————————————————————————  
  ${Green_font_prefix}1.${Font_color_suffix} 直接开启 BBR
  ${Green_font_prefix}2.${Font_color_suffix} 安装最新版内核并开启 BBR" && echo		
 		stty erase '^H' && read -p "(默认: 取消):" bbr_num
@@ -482,14 +483,14 @@ EOF
 		echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
 		echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
 		sysctl -p >/dev/null 2>&1
-		echo -e "${Info} BBR安装完成"
 	fi
+	echo -e "${Info} BBR安装完成"
 
 	#复核BBR是否开启
 	if ss -Hopt tcp 2>/dev/null | grep -q "bbr" || lsmod | grep -q "bbr" || sysctl net.ipv4.tcp_available_congestion_control | grep -q "bbr"; then
-		echo -e "${Info} BBR 正在运行中"
+		echo -e "${Info} 检查完毕，BBR 正在运行中"
 	else
-		echo -e "${Error} BBR 开启失败"
+		echo -e "${Error} 检查完毕，BBR 开启失败"
 	fi
 }
 
