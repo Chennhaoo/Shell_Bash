@@ -810,7 +810,7 @@ check_sys
 check_root
 clear
 #本地调试时注释掉版本检查
-#checkver
+checkver
 checkbbr_now
 sleep 2s
 clear
