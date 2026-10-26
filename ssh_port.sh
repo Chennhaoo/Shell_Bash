@@ -5,12 +5,11 @@ export PATH
 #=================================================
 #	System Required: Debian/Ubuntu
 #	Description: SSH modify port
-#	Version: 1.0.3
 #	Author: Toyo_ChennHaoo
 #	Blog: https://doub.io/linux-jc11/
 #=================================================
 
-sh_ver="1.0.3"
+sh_ver="2026.10.26_01"
 CONF="/etc/ssh/sshd_config"
 SSH_init_1="/etc/init.d/ssh"
 SSH_init_2="/etc/init.d/sshd"
@@ -61,11 +60,11 @@ check_iptables(){
 		echo -e "${Info} 未安装 iptables 防火墙 !
 本脚本无论是否安装 iptables 防火墙，均可修改 SSH 端口号，但建议安装！"
 		echo "确定安装 iptables 防火墙 ？[y/N]" && echo
-		stty erase '^H' && read -p "(默认: y):" unyn
-		if [[ ${unyn} == [Nn] ]]; then
-			echo && echo -e "${Info} 已跳过安装 iptables 防火墙" 
-			else
+		stty erase '^H' && read -p "(默认: N):" unyn
+		if [[ ${unyn} == [Yy] ]]; then
 			apt-get install iptables -y
+			else
+			echo && echo -e "${Info} 已跳过安装 iptables 防火墙" 
 		fi
 	fi
 }
