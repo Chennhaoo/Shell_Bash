@@ -9,12 +9,10 @@ export PATH
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2025.02.25_02"
+sh_ver="2026.10.27_02"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
-BBR_file="${file}/bbr_CH.sh"
 SSH_file="${file}/ssh_port.sh"
-ECS_file="${file}/ecs.sh"
 AutoTrace_file="${file}/AutoTrace.sh"
 BT_Panel="/www/server/panel"
 Kern_Ver=$( uname -r )
@@ -93,7 +91,7 @@ check_sys(){
 	OS_input="$(Os_Full)_${bit}_${VIRT}"
 
 	#开机时间
-	OPEN_UPTIME=$(uptime | awk -F'( |,|:)+' '{d=h=m=0; if ($7=="min") m=$6; else {if ($7~/^day/) {d=$6;h=$8;m=$9} else {h=$6;m=$7}}} {print d+0,"days,",h+0,"hours,",m+0,"minutes"}')
+	OPEN_UPTIME=$(awk '{total=int($1); d=int(total/86400); h=int((total%86400)/3600); m=int((total%3600)/60); printf "%d天，%d小时，%d分钟\n", d, h, m}' /proc/uptime)
 }
 
 #获取操作系统全版本号
@@ -141,6 +139,18 @@ VPS_Virt(){
 		fi
 	fi
 }
+
+
+#检查当前机器是否开启BBR
+checkbbr_now(){
+    local param=$(sysctl net.ipv4.tcp_congestion_control | awk '{print $3}')
+    if [[ x"${param}" == x"bbr" ]]; then
+        bbr_now="已开启 BBR 队列算法"
+    else
+        bbr_now="注意！未开启 BBR 队列算法"
+    fi
+}
+
 
 #脚本版本更新
 checkver() {
@@ -200,65 +210,82 @@ Debian_apt(){
 	fi
 }
 
+
+
 #更新系统时间
 SYS_Time(){
-	#安装软件
-	if  [[ "$(command -v ntpdate)" == "" ]]; then
-		echo -e "${Info} 开始安装 ntpdate ...."
-		if [[ ${release} == "centos" ]]; then
-			yum -y install ntp ntpdate
-		elif [[ ${release} == "debian" ]]; then	
-			apt-get install ntpdate -y
-		elif [[ ${release} == "ubuntu" ]]; then	
-			apt-get install ntpdate -y	
-		else
-		 	echo -e "${Error} 无法判断您的系统 " && exit 1	
-		fi
-	fi	
-	#修改时区
-	echo -e "${Info} 开始配置时区为上海时间...."
-	if [ -f /etc/localtime ]; then
-		if cat /etc/localtime | grep -Eqi "CST-8"; then
-			echo -e "${Info} 已是上海时区...."
-		else
-			\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-			echo -e "${Info} 时区错误，已修改为上海时区...."
-			#复核时区
-			if [[ ${release} == "centos" ]]; then
-				tzselect
-			elif [[ ${release} == "debian" ]]; then	
-				dpkg-reconfigure tzdata
-			elif [[ ${release} == "ubuntu" ]]; then	
-				dpkg-reconfigure tzdata	
-			else
-				echo -e "${Error} 无法判断您的系统 " && exit 1	
-			fi	
-		fi
-	else
-		\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-		echo -e "${Info} 时区文件不存在，已配置为上海时区...."
-		#复核时区
-		if [[ ${release} == "centos" ]]; then
-			tzselect
-		elif [[ ${release} == "debian" ]]; then	
-			dpkg-reconfigure tzdata
-		elif [[ ${release} == "ubuntu" ]]; then	
-			dpkg-reconfigure tzdata	
-		else
-			echo -e "${Error} 无法判断您的系统 " && exit 1	
-		fi	
-	fi
-	echo -e "${Info} 开始同步系统时间...."
-	ntpdate cn.pool.ntp.org
-	echo -e "${Info} 系统时间修改完毕，请使用 date 命令查看！"
+    #配置时区为上海时间
+    echo -e "${Info} 开始配置时区为上海时间...."
+    if command -v timedatectl &> /dev/null; then
+        timedatectl set-timezone Asia/Shanghai
+        echo -e "${Info} 已配置为上海时区"
+    else
+        if [ -f /usr/share/zoneinfo/Asia/Shanghai ]; then
+            \cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+            echo -e "${Info} 已修改为上海时区"
+        else
+            echo -e "${Error} 缺少系统时区文件，请检查系统环境！" && exit 1	
+        fi
+    fi
+
+    #强制系统锁定为24小时制
+    echo -e "${Info} 开始配置系统为 24 小时时间制...."
+    if command -v localectl &> /dev/null; then
+        # 现代系统标准做法：将时间格式（LC_TIME）单独设置为支持24小时制的区域（如 C.UTF-8 或 zh_CN.UTF-8）
+        localectl set-locale LC_TIME=C.UTF-8 2>/dev/null
+        echo -e "${Info} 已修改为 24 小时制...."
+    else
+        # 老旧系统/环境兜底：直接向配置文件写入环境变量
+        if [ -f /etc/default/locale ]; then
+            # 移除旧的 LC_TIME 设置，防止重复
+            sed -i '/LC_TIME/d' /etc/default/locale
+            echo "LC_TIME=C.UTF-8" >> /etc/default/locale
+        elif [ -f /etc/locale.conf ]; then
+            sed -i '/LC_TIME/d' /etc/locale.conf
+            echo "LC_TIME=C.UTF-8" >> /etc/locale.conf
+        fi
+        # 临时在当前脚本上下文中生效
+        export LC_TIME=C.UTF-8
+    fi
+
+    #同步系统时间
+    echo -e "${Info} 开始同步系统时间...."
+    if command -v timedatectl &> /dev/null; then
+        timedatectl set-ntp true 2>/dev/null
+        if command -v chronyc &> /dev/null; then
+            chronyc makestep &>/dev/null
+        fi
+        echo -e "${Info} 对时完成"
+    else
+        if [[ "$(command -v ntpdate)" == "" ]]; then
+            echo -e "${Info} 检测到旧版系统，开始安装 ntpdate ...."
+            if [[ ${release} == "centos" ]]; then
+                yum -y install ntpdate
+            elif [[ ${release} == "debian" || ${release} == "ubuntu" ]]; then    
+                apt-get update && apt-get install ntpdate -y
+            fi
+        fi
+        if command -v ntpdate &> /dev/null; then
+            ntpdate -u cn.pool.ntp.org
+        fi
+    fi
+
+    #将时间写入硬件时钟
+    hwclock --walthc 2>/dev/null || hwclock -w 2>/dev/null
+
+    #打印当前时间验证效果（临时强制用24小时格式输出展示）
+    echo -e "${Info} 系统时间修改完毕，当前24小时制时间为：$(LC_TIME=C.UTF-8 date)"
+    echo -e "${Info} 提示：重新登录 SSH 终端后，直接输入 date 命令即可永久显示24小时制。"
 }
+
+
 
 #更新系统及软件
 Update_SYS(){
 	echo -e "${Info} 升级前请做好备份，如有内核升级请慎重考虑 ！"
 	echo "确定要升级系统软件吗 ？[y/N]" && echo
-	stty erase '^H' && read -p "(默认: n):" unyn
-	[[ -z ${unyn} ]] && echo "已取消..." && exit 1
+	stty erase '^H' && read -p "(默认: Y):" unyn
+	[[ -z ${unyn} ]] && unyn="y"
 	if [[ ${unyn} == [Nn] ]]; then
 		echo && echo -e "${Info} 已取消..." && exit 1
 	elif [[ ${unyn} == [Yy] ]]; then		
@@ -297,7 +324,7 @@ Update_SYS_Yuan(){
 	elif [[ ${release} == "ubuntu" ]]; then
 		apt-get update
 	elif [[ ${release} == "debian" ]]; then 
-		if cat /etc/issue | grep -q -E "Debian GNU/Linux 10"; then
+		if [[ "$(Os_Ver)" == "10" ]]; then
 			echo -e "${Info} 您使用的是 Debian 10 系统，开始更新软件源...."
 			apt-get --allow-releaseinfo-change update
 			apt-get update
@@ -348,13 +375,6 @@ SYS_Hostname(){
 
 
 
-
-
-
-
-
-
-
 #安装BBR时进行系统判断
 Configure_BBR(){
 	VPS_Virt
@@ -364,33 +384,57 @@ Configure_BBR(){
 	if [ -n "${virt}" -a "${virt}" = "openvz" ] || [ -d "/proc/vz" ]; then
 		echo -e "${Error} BBR 不支持 OpenVZ 虚拟化(不支持更换内核) !" && exit 1
 	fi
+
+	# 检查BBR在内存或内核里是否真正启动成功，启动成功就退出
+	if ss -Hopt tcp 2>/dev/null | grep -q "bbr" || lsmod | grep -q "bbr" || sysctl net.ipv4.tcp_available_congestion_control | grep -q "bbr"; then
+		echo -e "${Info} 恭喜！您已开启 BBR 队列算法，无需再次设置" && exit 1
+	fi	
+
 	BBR_OS_VER
 	clear
 	if [[ ${release} == "centos" ]]; then
-		echo -e "请问您的系统是否为${Red_font_prefix} $OS_input ${Font_color_suffix}，正确请继续 [y/N]" && echo
+echo -e "您的系统为${Red_font_prefix} $OS_input ${Font_color_suffix}，您当前的内核版本为：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
+
+${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
+1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)，请备份重要文件
+2. 本脚本仅支持 KVM 虚拟化系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
+3. 本脚本来自于秋水逸冰，https://github.com/teddysun/across
+4. 系统识别错误请选择取消" && echo
+		echo -e "是否继续安装 [y/N]" && echo
 		stty erase '^H' && read -p "(默认: N):" unyn 
 		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
 		if [[ ${unyn} == [Nn] ]]; then
 			echo && echo -e "${Info} 已取消..." && exit 1
 		elif [[ ${unyn} == [Yy] ]]; then
 			clear
-			CENTOS_BBR
+			curl -sSO https://raw.githubusercontent.com/teddysun/across/refs/heads/master/bbr.sh && bash bbr.sh
 		else
 			echo -e "${Info} 请正确输入 " && exit 1
 		fi	
 	else
-		echo -e "请问您的系统是否为${Red_font_prefix} $OS_input ${Font_color_suffix}，正确请继续 [y/N]" && echo
-		stty erase '^H' && read -p "(默认: N):" unyn 
-		[[ -z "${unyn}" ]] && echo "已取消..." && exit 1
-		if [[ ${unyn} == [Nn] ]]; then
-			echo && echo -e "${Info} 已取消..." && exit 1
-		elif [[ ${unyn} == [Yy] ]]; then
+echo -e "您的系统为${Red_font_prefix} $OS_input ${Font_color_suffix}，您当前的内核版本为：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
+
+${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
+1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)，请备份重要文件
+2. 本脚本仅支持 KVM 虚拟化系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
+3. 若使用Debian 9、Ubuntu 18.04 等内核版本在${Green_font_prefix} 4.9.0 ${Font_color_suffix}及其之上的，可直接选择开启BBR而不需更换内核
+4. Debian/Ubuntu 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}
+5. 本脚本来自于秋水逸冰，https://github.com/teddysun/across
+6. 系统识别错误请选择取消" && echo		
+echo -e "	
+ ${Green_font_prefix}1.${Font_color_suffix} 直接开启 BBR
+ ${Green_font_prefix}2.${Font_color_suffix} 安装最新版内核并开启 BBR" && echo		
+		stty erase '^H' && read -p "(默认: 取消):" bbr_num
+		[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
+		if [[ ${bbr_num} == "1" ]]; then
+			Start_BBR
+		elif [[ ${bbr_num} == "2" ]]; then
 			clear
-			DEBIAN_BBR
+			curl -sSO https://raw.githubusercontent.com/teddysun/across/refs/heads/master/bbr.sh && bash bbr.sh		
 		else
-			echo -e "${Info} 请正确输入 " && exit 1				
-		fi
-	fi
+			echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
+		fi	
+	fi	
 }
 
 #KVM开启BBR系统版本判断
@@ -406,103 +450,48 @@ BBR_OS_VER(){
 	fi
 }
 
-#CentOS安装BBR
-CENTOS_BBR(){
-echo -e "  
-您的系统为${Red_font_prefix} $OS_input ${Font_color_suffix}，您当前的内核版本为：${Red_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
-	
- ${Green_font_prefix}1.${Font_color_suffix} 安装最新版内核并开启 BBR
-————————
- ${Green_font_prefix}2.${Font_color_suffix} 查看 BBR 状态" && echo
-echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
-1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)，请备份重要文件
-2. 本脚本仅支持 CentOS 系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
-3. 系统识别错误请选择取消" && echo
-	stty erase '^H' && read -p "(默认: 取消):" bbr_num
-	[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
-	if [[ ${bbr_num} == "1" ]]; then
-		Auto_BBR
-	elif [[ ${bbr_num} == "2" ]]; then
-		BBR_installation_status
-		bash "${BBR_file}" cntos_status
-
-	else
-		echo -e "${Error} 请输入正确的数字(1-2)" && exit 1
-	fi
-}
-
-# Debian/Ubuntu安装BBR
-DEBIAN_BBR(){
-echo -e "  
-您的系统为${Red_font_prefix} $OS_input ${Font_color_suffix}，您当前的内核版本为：${Red_font_prefix}$Kern_Ver${Font_color_suffix}，您要做什么？
-	
- ${Green_font_prefix}1.${Font_color_suffix} 直接开启 BBR
- ${Green_font_prefix}2.${Font_color_suffix} 安装最新版内核并开启 BBR
-————————
- ${Green_font_prefix}3.${Font_color_suffix} 停止 BBR
- ${Green_font_prefix}4.${Font_color_suffix} 查看 BBR 状态" && echo
-echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
-1. 若使用Debian 9、Ubuntu 18.04 等内核版本在${Green_font_prefix} 4.9.0 ${Font_color_suffix}及其之上的，可直接选择开启BBR而不需更换内核
-2. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)
-3. 本脚本仅支持 Debian/Ubuntu 系统更换内核，OpenVZ/Docker/LXC 不支持更换内核
-4. Debian/Ubuntu 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}
-5. 系统识别错误请选择取消" && echo
-	stty erase '^H' && read -p "(默认: 取消):" bbr_num
-	[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
-	if [[ ${bbr_num} == "1" ]]; then
-		Start_BBR
-	elif [[ ${bbr_num} == "2" ]]; then
-		Auto_BBR
-	elif [[ ${bbr_num} == "3" ]]; then
-		Stop_BBR
-	elif [[ ${bbr_num} == "4" ]]; then
-		Status_BBR		
-	else
-		echo -e "${Error} 请输入正确的数字(1-4)" && exit 1
-	fi
-}
 
 Start_BBR(){
-	BBR_installation_status
-	bash "${BBR_file}" start
-}
-Stop_BBR(){
-	BBR_installation_status
-	bash "${BBR_file}" stop
-}
-Status_BBR(){
-	BBR_installation_status
-	bash "${BBR_file}" status
-}
-#CentOS系统和其他系统直接自动升级到最新内核后自动开启
-Auto_BBR(){
-	VPS_Virt
-	if [ -n "${virt}" -a "${virt}" = "lxc" ]; then
-		echo -e "${Error} BBR 不支持 LXC 虚拟化(不支持更换内核) !" && exit 1
-	fi
-	if [ -n "${virt}" -a "${virt}" = "openvz" ] || [ -d "/proc/vz" ]; then
-		echo -e "${Error} BBR 不支持 OpenVZ 虚拟化(不支持更换内核) !" && exit 1
-	fi
-	BBR_installation_status
-	bash "${BBR_file}" auto
-}
+	#检查内核版本
+    local kernel_main_ver=$(uname -r | awk -F. '{print $1}')
+    local kernel_sub_ver=$(uname -r | awk -F. '{print $2}')
+	deb_ver="${kernel_main_ver}.${kernel_sub_ver}"
 
-BBR_installation_status(){
-	if [[ -e ${BBR_file} ]]; then
-		rm -rf "${BBR_file}" && echo -e "${Info} 已删除原始脚本，准备重新下载..."
-	else	
-		echo -e "${Error} 没有发现 BBR脚本，开始下载..."
-	fi
-	cd "${file}"
-	if ! wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/bbr_CH.sh; then
-		echo -e "${Error} BBR 脚本下载失败 !" && exit 1
+	if [[ -n "${kernel_main_ver}" && -n "${kernel_sub_ver}" ]]; then
+		if [[ ${kernel_main_ver} -gt 4 ]] || [[ ${kernel_main_ver} -eq 4 && ${kernel_sub_ver} -ge 9 ]]; then
+			echo -e "${Info} 当前内核版本 [${deb_ver}] 可以直接开启 BBR"
+		else
+			echo -e "${Error} 当前内核版本 [${deb_ver}] 无法直接开启 BBR，请更新内核！" && exit 1
+		fi
 	else
-		echo -e "${Info} BBR 脚本下载完成 !"
-		chmod +x bbr_CH.sh
+		echo -e "${Error} 无法判断当前内核版本" && exit 1
 	fi
 
-}
+	#判断是否为Debian13及其以上版本
+	if [[ ${release} == "debian" && -n "$(Os_Ver)" && "$(Os_Ver)" -ge 13 ]]; then
+		mkdir -p /etc/sysctl.d
+        cat << 'EOF' > /etc/sysctl.d/99-bbr.conf
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+EOF
+		sysctl --system >/dev/null 2>&1
+	else
+		#其他系统写入BBR
+		[ -f /etc/sysctl.conf ] && sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+		[ -f /etc/sysctl.conf ] && sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+		echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+		echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
+		sysctl -p >/dev/null 2>&1
+		echo -e "${Info} BBR安装完成"
+	fi
 
+	#复核BBR是否开启
+	if ss -Hopt tcp 2>/dev/null | grep -q "bbr" || lsmod | grep -q "bbr" || sysctl net.ipv4.tcp_available_congestion_control | grep -q "bbr"; then
+		echo -e "${Info} BBR 正在运行中"
+	else
+		echo -e "${Error} BBR 开启失败"
+	fi
+}
 
 
 #宝塔7.7修改面板
@@ -613,6 +602,46 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 	fi		
 }
 
+
+#宝塔第三方云端修改面板
+BT_Panel_DSF(){
+	clear
+	[[ -e ${BT_Panel} ]] && echo -e "${Error} 宝塔面板已安装，请访问https://www.bt.cn/btcode.html查询卸载方法" && exit 1
+echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
+ 本脚本为第三方云端修改版，修改版存在一定风险或后门，安装前请备份好重要数据
+ 如有漏洞更新可通过本脚本中${Green_font_prefix} 升级/更新 面板 ${Font_color_suffix}命令更新
+———————— 
+ 请问是否需要安装? [y/N]
+	 "
+	stty erase '^H' && read -p "(默认: y):" unyn 
+	if [[ ${unyn} == [Nn] ]]; then
+		echo -e "${Info} 已取消..." && exit 1
+	else
+		echo -e "${Info} 开始安装..."
+		curl -sSO https://btmb.anidays.com/install/install_panel.sh && bash install_panel.sh
+	fi	
+}
+
+
+#更新宝塔第三方云端修改面板
+UPDATE_BT_Panel_DSF(){
+	clear
+echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
+ 本脚本为第三方云端修改版，修改版存在一定风险或后门，安装前请备份好重要数据
+ 如有漏洞更新可通过本脚本中${Green_font_prefix} 升级/更新 面板 ${Font_color_suffix}命令更新
+———————— 
+ 请问是否需要安装? [y/N]
+	 "
+	stty erase '^H' && read -p "(默认: y):" unyn 
+	if [[ ${unyn} == [Nn] ]]; then
+		echo -e "${Info} 已取消..." && exit 1
+	else
+		echo -e "${Info} 开始安装..."
+		curl https://btmb.anidays.com/install/update6.sh|bash
+	fi	
+}
+
+
 #修改SSH端口
 Install_SSHPor(){
 	[[ ${release} = "centos" ]] && echo -e "${Error} 本脚本不支持 CentOS系统 !" && exit 1
@@ -637,15 +666,6 @@ Install_SSHPor(){
 	echo -e "${Info} 开始修改..."
 	bash "${SSH_file}"
 }
-
-
-
-
-
-
-
-
-
 
 
 #独服硬盘时间检测
@@ -739,56 +759,18 @@ ${Green_font_prefix} 10. ${Font_color_suffix}取消测试
 	fi	
 }
 
-#融合怪测试
-Ecs_Bench(){
-	cd "${file}"
-	clear
-	if [[ -e ${ECS_file} ]]; then
-		chmod +x "${ECS_file}"
-		bash "${ECS_file}"		
-	else	
-		echo -e "${Error} 没有发现融合怪 测试脚本，开始下载..."
-		if ! wget -N --no-check-certificate https://raw.githubusercontent.com/spiritLHLS/ecs/refs/heads/main/ecs.sh; then
-			echo -e "${Error} 融合怪 测试脚本下载失败 !" && exit 1
-		else
-			echo -e "${Info} 融合怪 测试脚本下载完成 !"
-			chmod +x "${ECS_file}"
-			bash "${ECS_file}"
-		fi
-	fi	
-	#测试完毕后删除脚本
-	rm -rf "${ECS_file}"
-	if [[ -e ${ECS_file} ]]; then
-		echo -e "${Error} 删除文件失败，请手动删除 ${ECS_file}"
-	else	
-		echo -e "${Info} 已删除文件"
-	fi
-	rm -rf "${file}/test_result.txt"
-	if [[ -e ${file}/test_result.txt ]]; then
-		echo -e "${Error} 删除跑分文件失败，请手动删除 ${file}/test_result.txt"
-	else	
-		echo -e "${Info} 已删除跑分文件"
-	fi	
-}
 
-#流媒体解锁检测
-Install_LMT(){
-	cd "${file}"
+#NodeQuality全能检测脚本
+NQ_TEST(){
 	clear
-	echo -e "${Info} 脚本初始化中 !"
-	bash <(curl -sSL https://raw.githubusercontent.com/lmc999/RegionRestrictionCheck/main/check.sh)
-}
-
-#IP质量检测&解锁检测
-IP_Check(){
 	cd "${file}"
-	clear
 	echo -e "${Info} 脚本初始化中 !"
-	bash <(curl -sL IP.Check.Place)
+	bash <(curl -sL https://run.NodeQuality.com)
 }
 
 #三网回程路由
 LY_AutoTrace(){	
+	clear
 	cd "${file}"
 	if [[ -e ${AutoTrace_file} ]]; then
 		chmod +x "${AutoTrace_file}"
@@ -827,7 +809,9 @@ echo -e "${Info} 脚本正在初始化，请稍等 ！"
 check_sys
 check_root
 clear
-checkver
+#本地调试时注释掉版本检查
+#checkver
+checkbbr_now
 sleep 2s
 clear
 [[ ${release} != "debian" ]] && [[ ${release} != "ubuntu" ]] && [[ ${release} != "centos" ]] && echo -e "${Error} 本脚本不支持当前系统 ${release} !" && exit 1
@@ -840,21 +824,22 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 4.${Font_color_suffix} 修改系统时间为上海时间
  ${Green_font_prefix} 5.${Font_color_suffix} 修改当前用户登录密码 
  ${Green_font_prefix} 6.${Font_color_suffix} 修改 Hostname 
+ ${Green_font_prefix} 7.${Font_color_suffix} 修改 SSH 端口（Centos无法使用）
+ ${Green_font_prefix} 8.${Font_color_suffix} 配置 KVM BBR
 ————————————
- ${Green_font_prefix} 7.${Font_color_suffix} 配置 KVM BBR
- ${Green_font_prefix} 8.${Font_color_suffix} 安装宝塔 7.7 面板（修改版，不强制绑定）
- ${Green_font_prefix} 9.${Font_color_suffix} 升级到/更新 宝塔 7.7 面板（修改版，不强制绑定，只能由低版本升级）
- ${Green_font_prefix} 10.${Font_color_suffix} 修改 SSH 端口（宝塔用户请在面板中修改/Centos无法使用）
+ ${Green_font_prefix} 9.${Font_color_suffix} 安装宝塔 7.7 面板（官方修改版，不强制绑定）
+ ${Green_font_prefix} 10.${Font_color_suffix} 升级到/更新 宝塔 7.7 面板（官方修改版，不强制绑定，只能由低版本升级）
+ ${Green_font_prefix} 11.${Font_color_suffix} 安装宝塔 13.1.0 面板（第三方云端修改版，不强制绑定）
+ ${Green_font_prefix} 12.${Font_color_suffix} 升级到/更新 宝塔 13.1.0 面板（第三方修改版，不强制绑定，只能由低版本升级）
 ————————————
- ${Green_font_prefix} 11.${Font_color_suffix} 独服硬盘时间检测
- ${Green_font_prefix} 12.${Font_color_suffix} Yabs 测试（GB跑分）
- ${Green_font_prefix} 13.${Font_color_suffix} 融合怪脚本测试（全能）
- ${Green_font_prefix} 14.${Font_color_suffix} 流媒体解锁检测（全面）
- ${Green_font_prefix} 15.${Font_color_suffix} IP质量检测&软件解锁检测
+ ${Green_font_prefix} 13.${Font_color_suffix} 独服硬盘时间检测
+ ${Green_font_prefix} 14.${Font_color_suffix} Yabs 测试（GB跑分）
+ ${Green_font_prefix} 15.${Font_color_suffix} NodeQuality 全能检测脚本
  ${Green_font_prefix} 16.${Font_color_suffix} 三网回程路由
 
  ${Info} 系统：${Red_font_prefix}$OS_input${Font_color_suffix} / 内核：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
  ${Info} 开机时间：${Red_font_prefix}$OPEN_UPTIME${Font_color_suffix}
+ ${Info} BBR状态：${Red_font_prefix}$bbr_now${Font_color_suffix}
  ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
 read -e -p " 请输入数字 [1-16]:" num
@@ -878,31 +863,31 @@ case "$num" in
 	SYS_Hostname
 	;;
 	7)
-	Configure_BBR
+	Install_SSHPor
 	;;
 	8)
-	BT_Panel_7.7
+	Configure_BBR
 	;;
 	9)
-	UPDATE_BT_Panel_7.7
+	BT_Panel_7.7
 	;;
 	10)
-	Install_SSHPor
-	;;	
+	UPDATE_BT_Panel_7.7
+	;;
 	11)
-	DF_Test
+	BT_Panel_DSF
 	;;
 	12)
-	Install_YB
+	UPDATE_BT_Panel_DSF
 	;;
 	13)
-	Ecs_Bench
+	DF_Test
 	;;
 	14)
-	Install_LMT
+	Install_YB
 	;;
 	15)
-	IP_Check
+	NQ_TEST
 	;;
 	16)
 	LY_AutoTrace
