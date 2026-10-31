@@ -9,7 +9,7 @@ export PATH
 #	Blog: https://github.com/Chennhaoo
 #=================================================
 
-sh_ver="2026.10.27_03"
+sh_ver="2026.10.31_01"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 SSH_file="${file}/ssh_port.sh"
@@ -145,9 +145,9 @@ VPS_Virt(){
 checkbbr_now(){
     local param=$(sysctl net.ipv4.tcp_congestion_control | awk '{print $3}')
     if [[ x"${param}" == x"bbr" ]]; then
-        bbr_now="已开启 BBR 队列算法"
+        bbr_now="open"
     else
-        bbr_now="注意！未开启 BBR 队列算法"
+        bbr_now="close"
     fi
 }
 
@@ -378,6 +378,7 @@ SYS_Hostname(){
 #安装BBR时进行系统判断
 Configure_BBR(){
 	VPS_Virt
+	clear
 	if [ -n "${virt}" -a "${virt}" = "lxc" ]; then
 		echo -e "${Error} BBR 不支持 LXC 虚拟化(不支持更换内核) !" && exit 1
 	fi
@@ -810,8 +811,10 @@ echo -e "${Info} 脚本正在初始化，请稍等 ！"
 check_sys
 check_root
 clear
+
 #本地调试时注释掉版本检查
 checkver
+
 checkbbr_now
 sleep 2s
 clear
@@ -837,12 +840,20 @@ echo -e " VPS工具包 一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_c
  ${Green_font_prefix} 14.${Font_color_suffix} Yabs 测试（GB跑分）
  ${Green_font_prefix} 15.${Font_color_suffix} NodeQuality 全能检测脚本
  ${Green_font_prefix} 16.${Font_color_suffix} 三网回程路由
-
- ${Info} 系统：${Red_font_prefix}$OS_input${Font_color_suffix} / 内核：${Red_font_prefix}$Kern_Ver${Font_color_suffix}
- ${Info} 开机时间：${Red_font_prefix}$OPEN_UPTIME${Font_color_suffix}
- ${Info} BBR状态：${Red_font_prefix}$bbr_now${Font_color_suffix}
- ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !
 " && echo
+echo -e " ${Info} 系统：${Red_font_prefix}$OS_input${Font_color_suffix} / 内核：${Red_font_prefix}$Kern_Ver${Font_color_suffix}"
+echo -e " ${Info} 开机时间：${Red_font_prefix}$OPEN_UPTIME${Font_color_suffix}"
+
+if [[ "${bbr_now}" == "open" ]]; then
+	echo -e " ${Info} BBR状态：已开启"
+elif [[ "${bbr_now}" == "close" ]]; then 
+	echo -e " ${Info} BBR状态：${Red_font_prefix}未开启${Font_color_suffix}"
+else
+	echo -e " ${Info} BBR状态：${Red_font_prefix}无法检测${Font_color_suffix}"
+fi
+
+echo -e " ${Info} 任何时候都可以通过 Ctrl+C 终止命令 !"
+echo
 read -e -p " 请输入数字 [1-16]:" num
 case "$num" in
 	1)
